@@ -14,10 +14,8 @@
 #include "Point.h"
 
 
-Point::Point() {
-}
-
 Point::Point(const Point& orig) {
+    x = orig.x; y = orig.y; z = orig.z;
 }
 
 Point::~Point() {
@@ -29,7 +27,7 @@ std::ostream& operator<<(std::ostream& s, const Point& p) {
     return s;
 }
 
-double Point::operator[](int i) {
+double Point::operator[](int i) const{
     switch(i){
         case 0: return x;
         case 1: return y;
@@ -37,7 +35,7 @@ double Point::operator[](int i) {
     }
 }
 
-double Point::operator*(Point p) {
+double Point::operator*(const Point& p) const{
     double dot = 0;
     for(int i = 0; i < 3; i++) dot += (*this)[i]*p[i];
     return dot;
@@ -46,6 +44,6 @@ double Point::operator*(Point p) {
 Point::Point(double x, double y, double z):x(x),y(y),z(z) {
 }
 
-double Point::cross(Point p) {
+Point::Point cross(const Point& p) const {
     return Point(y*p.z - z*p.y, z*p.x - x*p.z, x*p.y-y*p.x);
 }
