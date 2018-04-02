@@ -14,8 +14,7 @@
 #include "Point.h"
 
 
-Point::Point(const Point& orig) {
-    x = orig.x; y = orig.y; z = orig.z;
+Point::Point(const Point& orig):x(orig.x), y(orig.y), z(orig.z) {
 }
 
 Point::~Point() {
@@ -44,6 +43,6 @@ double Point::operator*(const Point& p) const{
 Point::Point(double x, double y, double z):x(x),y(y),z(z) {
 }
 
-Point::Point cross(const Point& p) const {
+Point Point::cross(const Point& p) const {
     return Point(y*p.z - z*p.y, z*p.x - x*p.z, x*p.y-y*p.x);
 }

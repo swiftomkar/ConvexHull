@@ -12,7 +12,7 @@
  */
 
 #include <cstdlib>
-
+#include "Point.h"
 using namespace std;
 
 /*
