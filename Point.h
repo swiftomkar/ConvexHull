@@ -30,6 +30,10 @@ public:
     double operator*(const Point& p) const;
 
     Point cross(const Point& p) const;
+    
+    Point operator +(Point p);
+    Point operator *(double d);
+    Point operator -(Point p);
 private:
 
 };
