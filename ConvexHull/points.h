@@ -5,11 +5,9 @@
 
 #include <iostream>
 using namespace std;
-class point{
+class Point{
 public:
-    double x;
-    double y;
-    double z;
+    double x, y, z;
     point(double x=0, double y=0, double z=0):x(x),y(y),z(z){}
     friend ostream& operator << (ostream& s,const point& p){
         s<<p.x<<", "<<p.y<<" , "<<p.z;
