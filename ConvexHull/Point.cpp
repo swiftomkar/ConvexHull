@@ -10,11 +10,15 @@
  * 
  * Created on April 2, 2018, 1:02 PM
  */
+#pragma once
 
 #include "Point.h"
 
 
-Point::Point(const Point& orig):x(orig.x), y(orig.y), z(orig.z) {
+Point::Point() {
+}
+
+Point::Point(const Point& orig) {
 }
 
 Point::~Point() {
@@ -26,7 +30,7 @@ std::ostream& operator<<(std::ostream& s, const Point& p) {
     return s;
 }
 
-double Point::operator[](int i) const{
+double Point::operator[](int i) {
     switch(i){
         case 0: return x;
         case 1: return y;
@@ -34,7 +38,7 @@ double Point::operator[](int i) const{
     }
 }
 
-double Point::operator*(const Point& p) const{
+double Point::operator * (Point p) {
     double dot = 0;
     for(int i = 0; i < 3; i++) dot += (*this)[i]*p[i];
     return dot;
@@ -43,6 +47,6 @@ double Point::operator*(const Point& p) const{
 Point::Point(double x, double y, double z):x(x),y(y),z(z) {
 }
 
-Point Point::cross(const Point& p) const {
+Point::Point cross(Point p) {
     return Point(y*p.z - z*p.y, z*p.x - x*p.z, x*p.y-y*p.x);
 }
