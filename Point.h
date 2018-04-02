@@ -26,7 +26,7 @@ public:
         const double x, y, z;
     Point(double x = 0, double y = 0, double z = 0);
     
-    //friend std::ostream& operator<<(ostream& s, const Point& p);
+    friend std::ostream& operator<<(std::ostream& s, const Point& p);
     double operator[](int i);
     double operator*(Point p);
     
