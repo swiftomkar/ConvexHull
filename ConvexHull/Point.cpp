@@ -15,15 +15,14 @@
 #include "Point.h"
 
 
-Point::Point() {
-}
+Point::Point(double x=0, double y=0, double z=0):x(x),y(y),z(z){}
 
-Point::Point(const Point& orig) {
+Point::Point(const Point& orig):x(orig.x),y(orig.y),z(orig.z) {
 }
 
 Point::~Point() {
+    delete x,y,z;
 }
-
 
 std::ostream& operator<<(std::ostream& s, const Point& p) {
     s << p.x << ", " << p.y << " , " << p.z;
@@ -40,13 +39,11 @@ double Point::operator[](int i) {
 
 double Point::operator * (Point p) {
     double dot = 0;
-    for(int i = 0; i < 3; i++) dot += (*this)[i]*p[i];
+    for(int i = 0; i < 3; i++)
+        dot += (*this)[i]*p[i];
     return dot;
 }
 
-Point::Point(double x, double y, double z):x(x),y(y),z(z) {
-}
-
-Point::Point cross(Point p) {
+Point Point::cross(Point p) {
     return Point(y*p.z - z*p.y, z*p.x - x*p.z, x*p.y-y*p.x);
 }

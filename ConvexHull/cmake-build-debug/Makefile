@@ -110,17 +110,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named main.cpp
+# Target rules for targets named ConvexHull
 
 # Build rule for target.
-main.cpp: cmake_check_build_system
-	$(MAKE) -f CMakeFiles\Makefile2 main.cpp
-.PHONY : main.cpp
+ConvexHull: cmake_check_build_system
+	$(MAKE) -f CMakeFiles\Makefile2 ConvexHull
+.PHONY : ConvexHull
 
 # fast build rule for target.
-main.cpp/fast:
-	$(MAKE) -f CMakeFiles\main.cpp.dir\build.make CMakeFiles/main.cpp.dir/build
-.PHONY : main.cpp/fast
+ConvexHull/fast:
+	$(MAKE) -f CMakeFiles\ConvexHull.dir\build.make CMakeFiles/ConvexHull.dir/build
+.PHONY : ConvexHull/fast
 
 Facet.obj: Facet.cpp.obj
 
@@ -128,7 +128,7 @@ Facet.obj: Facet.cpp.obj
 
 # target to build an object file
 Facet.cpp.obj:
-	$(MAKE) -f CMakeFiles\main.cpp.dir\build.make CMakeFiles/main.cpp.dir/Facet.cpp.obj
+	$(MAKE) -f CMakeFiles\ConvexHull.dir\build.make CMakeFiles/ConvexHull.dir/Facet.cpp.obj
 .PHONY : Facet.cpp.obj
 
 Facet.i: Facet.cpp.i
@@ -137,7 +137,7 @@ Facet.i: Facet.cpp.i
 
 # target to preprocess a source file
 Facet.cpp.i:
-	$(MAKE) -f CMakeFiles\main.cpp.dir\build.make CMakeFiles/main.cpp.dir/Facet.cpp.i
+	$(MAKE) -f CMakeFiles\ConvexHull.dir\build.make CMakeFiles/ConvexHull.dir/Facet.cpp.i
 .PHONY : Facet.cpp.i
 
 Facet.s: Facet.cpp.s
@@ -146,7 +146,7 @@ Facet.s: Facet.cpp.s
 
 # target to generate assembly for a file
 Facet.cpp.s:
-	$(MAKE) -f CMakeFiles\main.cpp.dir\build.make CMakeFiles/main.cpp.dir/Facet.cpp.s
+	$(MAKE) -f CMakeFiles\ConvexHull.dir\build.make CMakeFiles/ConvexHull.dir/Facet.cpp.s
 .PHONY : Facet.cpp.s
 
 Point.obj: Point.cpp.obj
@@ -155,7 +155,7 @@ Point.obj: Point.cpp.obj
 
 # target to build an object file
 Point.cpp.obj:
-	$(MAKE) -f CMakeFiles\main.cpp.dir\build.make CMakeFiles/main.cpp.dir/Point.cpp.obj
+	$(MAKE) -f CMakeFiles\ConvexHull.dir\build.make CMakeFiles/ConvexHull.dir/Point.cpp.obj
 .PHONY : Point.cpp.obj
 
 Point.i: Point.cpp.i
@@ -164,7 +164,7 @@ Point.i: Point.cpp.i
 
 # target to preprocess a source file
 Point.cpp.i:
-	$(MAKE) -f CMakeFiles\main.cpp.dir\build.make CMakeFiles/main.cpp.dir/Point.cpp.i
+	$(MAKE) -f CMakeFiles\ConvexHull.dir\build.make CMakeFiles/ConvexHull.dir/Point.cpp.i
 .PHONY : Point.cpp.i
 
 Point.s: Point.cpp.s
@@ -173,8 +173,35 @@ Point.s: Point.cpp.s
 
 # target to generate assembly for a file
 Point.cpp.s:
-	$(MAKE) -f CMakeFiles\main.cpp.dir\build.make CMakeFiles/main.cpp.dir/Point.cpp.s
+	$(MAKE) -f CMakeFiles\ConvexHull.dir\build.make CMakeFiles/ConvexHull.dir/Point.cpp.s
 .PHONY : Point.cpp.s
+
+main.obj: main.cpp.obj
+
+.PHONY : main.obj
+
+# target to build an object file
+main.cpp.obj:
+	$(MAKE) -f CMakeFiles\ConvexHull.dir\build.make CMakeFiles/ConvexHull.dir/main.cpp.obj
+.PHONY : main.cpp.obj
+
+main.i: main.cpp.i
+
+.PHONY : main.i
+
+# target to preprocess a source file
+main.cpp.i:
+	$(MAKE) -f CMakeFiles\ConvexHull.dir\build.make CMakeFiles/ConvexHull.dir/main.cpp.i
+.PHONY : main.cpp.i
+
+main.s: main.cpp.s
+
+.PHONY : main.s
+
+# target to generate assembly for a file
+main.cpp.s:
+	$(MAKE) -f CMakeFiles\ConvexHull.dir\build.make CMakeFiles/ConvexHull.dir/main.cpp.s
+.PHONY : main.cpp.s
 
 # Help Target
 help:
@@ -182,7 +209,7 @@ help:
 	@echo ... all (the default if no target is provided)
 	@echo ... clean
 	@echo ... depend
-	@echo ... main.cpp
+	@echo ... ConvexHull
 	@echo ... edit_cache
 	@echo ... rebuild_cache
 	@echo ... Facet.obj
@@ -191,6 +218,9 @@ help:
 	@echo ... Point.obj
 	@echo ... Point.i
 	@echo ... Point.s
+	@echo ... main.obj
+	@echo ... main.i
+	@echo ... main.s
 .PHONY : help
 
 

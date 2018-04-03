@@ -17,16 +17,24 @@
 #define FACET_H
 
 #include "Point.h"
+#include <vector>
 
 class Facet {
 public:
     Facet();
     Facet(const Facet& orig);
     virtual ~Facet();
-        
     bool faces(Point p);
     Point normal();
+    int numFacets(){
+        return numberOfFacets;
+    }
+    std::vector<Facet> FacetList(){
+        return Facetlist;
+    }
 private:
+    int numberOfFacets;
+    std::vector<Facet> Facetlist;
 
 };
 
