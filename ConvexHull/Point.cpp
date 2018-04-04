@@ -10,12 +10,11 @@
  * 
  * Created on April 2, 2018, 1:02 PM
  */
-#pragma once
 
 #include "Point.h"
 
 
-Point::Point(double x=0, double y=0, double z=0):x(x),y(y),z(z){}
+Point::Point(double x, double y, double z):x(x),y(y),z(z){}
 
 Point::Point(const Point& orig):x(orig.x),y(orig.y),z(orig.z) {
 }

@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/Omkar Desai/Documents/C++/ConvexHull/ConvexHull/Facet.cpp
+Facet.h
+C:/Users/Omkar Desai/Documents/C++/ConvexHull/ConvexHull/Facet.h
+
+C:/Users/Omkar Desai/Documents/C++/ConvexHull/ConvexHull/Facet.h
+Point.h
+C:/Users/Omkar Desai/Documents/C++/ConvexHull/ConvexHull/Point.h
+vector
+-
+
+C:/Users/Omkar Desai/Documents/C++/ConvexHull/ConvexHull/Point.cpp
+Point.h
+C:/Users/Omkar Desai/Documents/C++/ConvexHull/ConvexHull/Point.h
+
+C:/Users/Omkar Desai/Documents/C++/ConvexHull/ConvexHull/Point.h
+iostream
+-
+
+C:/Users/Omkar Desai/Documents/C++/ConvexHull/ConvexHull/main.cpp
+iostream
+-
+
