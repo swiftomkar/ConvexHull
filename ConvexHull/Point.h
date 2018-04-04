@@ -21,19 +21,26 @@
 class Point {
 public:
     //Point();
-    Point(const Point& orig);
-    ~Point();
-        const double x, y, z;
-    Point(double x = 0, double y = 0, double z = 0);
     
-    //friend std::ostream& operator<<(ostream& s, const Point& p);
-    double operator[](int i);
-    double operator *(Point p);
+
+    const double x, y, z;
     
-    Point cross(Point p);
+    Point(const Point& orig): x(orig.x), y(orig.y), z(orig.z){}    
+    Point(double x, double y, double z) : x(x), y(y), z(z){}
+
+    friend std::ostream& operator<<(std::ostream& s, const Point& p);
+    double operator[](int i) const;
+    double dot(const Point& p) const;
+    Point cross(const Point& p) const;
+    
+    Point operator +(const Point& p) const;
+    Point operator -(const Point& p) const;
+    Point operator *(double t) const;
+    
+
+    
 private:
 
 };
 
 #endif /* POINT_H */
-

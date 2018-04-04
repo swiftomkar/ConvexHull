@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /* 
  * File:   Point.cpp
@@ -10,43 +5,43 @@
  * 
  * Created on April 2, 2018, 1:02 PM
  */
-#pragma once
 
 #include "Point.h"
 
 
-Point::Point() {
-}
-
-Point::Point(const Point& orig) {
-}
-
-Point::~Point() {
-}
-
-
 std::ostream& operator<<(std::ostream& s, const Point& p) {
-    s << p.x << ", " << p.y << " , " << p.z;
-    return s;
+    return s << p.x << ", " << p.y << " , " << p.z;
 }
 
-double Point::operator[](int i) {
-    switch(i){
+
+double Point::operator[](int i) const {
+    switch (i) {
         case 0: return x;
         case 1: return y;
         case 2: return z;
     }
 }
 
-double Point::operator * (Point p) {
+double Point::dot(const Point& p) const {
     double dot = 0;
-    for(int i = 0; i < 3; i++) dot += (*this)[i]*p[i];
+    for (int i = 0; i < 3; i++) dot += (*this)[i] * p[i];
     return dot;
 }
 
-Point::Point(double x, double y, double z):x(x),y(y),z(z) {
+
+Point Point::cross(const Point& p) const {
+    return Point(y * p.z - z * p.y, z * p.x - x * p.z, x * p.y - y * p.x);
 }
 
-Point::Point cross(Point p) {
-    return Point(y*p.z - z*p.y, z*p.x - x*p.z, x*p.y-y*p.x);
+Point Point::operator*(double t) const {
+    return Point(x*t, y*t, z * t);
 }
+
+Point Point::operator+(const Point& p) const {
+    return Point(p.x + x, p.y + y, p.z + z);
+}
+
+Point Point::operator-(const Point& p) const {
+    return (*this)+(p*-1);
+}
+

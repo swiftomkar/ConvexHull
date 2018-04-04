@@ -8,27 +8,22 @@
  * File:   Facet.h
  * Author: dov
  *
- * Created on April 2, 2018, 1:04 PM
+ * Created on April 4, 2018, 5:31 PM
  */
-
-
 
 #ifndef FACET_H
 #define FACET_H
 
+
+#include <vector>
 #include "Point.h"
 
-class Facet {
-public:
-    Facet();
-    Facet(const Facet& orig);
-    virtual ~Facet();
-        
-    bool faces(Point p);
-    Point normal();
-private:
+class Facet: public std::vector<Point> {
+public: 
+
+    bool faces(const Point& p) const;
+    Point normal() const;
 
 };
 
 #endif /* FACET_H */
-
