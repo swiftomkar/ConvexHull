@@ -19,9 +19,7 @@ Point::Point(double x, double y, double z):x(x),y(y),z(z){}
 Point::Point(const Point& orig):x(orig.x),y(orig.y),z(orig.z) {
 }
 
-Point::~Point() {
-    delete x,y,z;
-}
+Point::~Point() {}
 
 std::ostream& operator<<(std::ostream& s, const Point& p) {
     s << p.x << ", " << p.y << " , " << p.z;
