@@ -1,18 +1,19 @@
+
 /* 
  * File:   Facet.cpp
  * Author: dov
  * 
- * Created on April 2, 2018, 1:04 PM
+ * Created on April 4, 2018, 5:31 PM
  */
 
 #include "Facet.h"
 
-Facet::Facet() {
+
+Point Facet::normal() const{
+    return ((*this)[0]-(*this)[1]).cross((*this)[2] - (*this)[1]);
 }
 
-Facet::Facet(const Facet& orig) {
-}
 
-Facet::~Facet() {
+bool Facet::faces(const Point& p) const{
+    return (p - (*this)[0]).dot(normal()) > 0;
 }
-
