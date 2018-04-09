@@ -3,4 +3,4 @@ project(localCH)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(main.cpp ConflictGraph.h Point.h Point.cpp Facet.h Facet.cpp)
+add_executable(ConvexHull main.cpp ConflictGraph.h Point.h Point.cpp Facet.h Facet.cpp)
