@@ -23,7 +23,7 @@ public:
     //Point();
     
 
-    const double x, y, z;
+    double x, y, z;
     static constexpr double EPSILON = 1e-7;
     
     Point(const Point& orig): x(orig.x), y(orig.y), z(orig.z){}    
@@ -34,19 +34,21 @@ public:
     double dot(const Point& p) const;
     Point cross(const Point& p) const;
     
+    double distSquared(const Point& p)const;
+    
     Point operator +(const Point& p) const;
     Point operator -(const Point& p) const;
     Point operator *(double t) const;
-//    bool operator ==(Point p);
+    bool operator ==(const Point& p) const;
+    Point operator =(const Point& p);
     
-    friend int colinear(Point a, Point b, Point c);
-    double mag();
-    double magSquared();
-    double d(Point p);
-    double distSquared(Point p);
+    friend int colinear(const Point& a, const Point& b, const Point& c);
+    double mag() const;
+    double magSquared()const;
+    double d(const Point& p)const;    
    
 private:
-    bool inBetween(Point a, Point b);
+    bool inBetween(const Point& a, const Point& b) const;
 
 };
 

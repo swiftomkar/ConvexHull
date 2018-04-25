@@ -44,35 +44,39 @@ Point Point::operator-(const Point& p) const {
     return (*this)+(p*-1);
 }
 
-bool Point::operator==(Point p) {
+double Point::distSquared(const Point& p) const {
+    return ((*this) - p).magSquared();
+}
+
+bool Point::operator==(const Point& p) const{
     return distSquared(p) < Point::EPSILON;
 }
 
+Point Point::operator=(const Point& p) {
+    x = p.x; y = p.y; z = p.z;
+}
 
-int colinear(Point a, Point b, Point c) {
+
+int colinear(const Point& a, const Point& b, const Point& c) {
     if (((b - a).cross(c - a)).magSquared() > Point::EPSILON) return -1;
     if (a.inBetween(b, c)) return 0;
     if (b.inBetween(a, c)) return 1;
     if (c.inBetween(a, b)) return 2;
 }
 
-double Point::magSquared() {
+double Point::magSquared() const {
     return x * x + y * y + z*z;
 }
 
-double Point::mag() {
+double Point::mag() const{
     return sqrtf(magSquared());
 }
 
-double Point::d(Point p) {
+double Point::d(const Point& p) const{
     return ((*this) - p).mag();
 }
 
-double Point::distSquared(Point p) {
-    return ((*this) - p).magSquared();
-}
-
-bool Point::inBetween(Point a, Point b) {
+bool Point::inBetween(const Point& a, const Point& b) const{
     double ab = a.distSquared(b);
     if (distSquared(a) < ab && distSquared(b) < ab) return true;
 }
