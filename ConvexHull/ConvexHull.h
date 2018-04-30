@@ -1,31 +1,27 @@
-
-/* 
- * File:   ConvexHull.h
- * Author: eneimand
- *
- * Created on April 9, 2018, 2:07 PM
- */
-
-#ifndef CONVEXHULL_H
-#define CONVEXHULL_H
+#pragma once
 
 #include "Facet.h"
 #include "SmartFacet.h"
+#include "Edge.h"
 #include <vector>
 
+using namespace std;
 
-class ConvexHull : public std::vector<SmartFacet>{
+class ConvexHull : public vector<SmartFacet>{
 public:
-    ConvexHull(std::vector<SmartPoint> points);    
+    ConvexHull(vector<SmartPoint> points);    
     
 //    ConvexHull(const ConvexHull& orig);
 //    virtual ~ConvexHull();
-    void pyramid(const SmartPoint& p, SmartFacet& f);
+    
 private:
-    int firstFacet(std::vector<SmartPoint> points);
-    void initConflictGraph(std::vector<SmartPoint> points);
+    void pyramid(SmartPoint& p, SmartFacet& f);
+    void cone(SmartPoint& p, vector<Edge>& edges);
+    int firstFacet(vector<SmartPoint> points);
+    void initConflictGraph(vector<SmartPoint> points);
+    void setHorizon(vector<Edge>& horizon, SmartPoint& star);
+    void removeFace(SmartPoint& star);
+    void updateConflifctGraph(vector<Edge>& horizon, SmartPoint& star);
+    void removeDisabledFacets();
     
 };
-
-#endif /* CONVEXHULL_H */
-

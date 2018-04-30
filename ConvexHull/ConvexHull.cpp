@@ -1,31 +1,32 @@
-/* 
- * File:   ConvexHull.cpp
- * Author: eneimand
- * 
- * Created on April 9, 2018, 2:07 PM
- */
+
 
 #include "ConvexHull.h"
-#include "smartPoint.h"
+#include "SmartPoint.h"
+#include "Edge.h"
 
-ConvexHull::ConvexHull(std::vector<SmartPoint> points) {
+using namespace std;
 
-    int i = firstFacet(points);
-    pyramid(points[i], (*this)[0]);
+ConvexHull::ConvexHull(vector<SmartPoint> points) {
 
-    initConflictGraph(std::vector<SmartPoint>(points.begin() + i + 1, points.begin() + points.size()));
+    int pointIndex = firstFacet(points);
+    pyramid(points[pointIndex], (*this)[0]);
 
+    initConflictGraph(vector<SmartPoint>(points.begin() + pointIndex + 1, points.begin() + points.size()));
 
-    while (++i > points.size()) {
-        while(i < points.size() && points[i].inside()) i++;
-        if(i == points.size()) break;
-        
-        
+    while (++pointIndex < points.size()) {
+        while (pointIndex < points.size() && points[pointIndex].inside()) pointIndex++;
+        if (pointIndex == points.size()) break;
+
+        vector<Edge> horizon;
+        setHorizon(horizon, points[pointIndex]);
+        cone(points[pointIndex], horizon);
+        removeFace(points[pointIndex]);
+        updateConflifctGraph(horizon, points[pointIndex]);
     }
 
 }
 
-int ConvexHull::firstFacet(std::vector<SmartPoint> points) {
+int ConvexHull::firstFacet(vector<SmartPoint> points) {
     SmartFacet facet1;
     int pointsIndex = 0;
     facet1.push_back(points[pointsIndex++]);
@@ -52,7 +53,7 @@ int ConvexHull::firstFacet(std::vector<SmartPoint> points) {
     return pointsIndex;
 }
 
-void ConvexHull::pyramid(const SmartPoint& tip, SmartFacet& base) {
+void ConvexHull::pyramid(SmartPoint& tip, SmartFacet& base) {
 
     if (base.faces(tip)) base.flip();
 
@@ -70,35 +71,95 @@ void ConvexHull::pyramid(const SmartPoint& tip, SmartFacet& base) {
         }
         side.bondNieghborOneSide(2, (*this)[size() - base.size()]);
         (*this)[size() - base.size()].bondNieghborOneSide(1, side);
-        
+
         push_back(side);
     }
 
 }
 
-void ConvexHull::initConflictGraph(std::vector<SmartPoint> points) {
-    for(int i = 0; i < size(); i++)
-        (*this)[i].initPoints(points);
+void ConvexHull::cone(SmartPoint& tip, std::vector<Edge>& edges){
+    for (int j = 0; j < edges.size(); j++) {
+        SmartFacet side;
+        side.push_back(edges[j].b());
+        side.push_back(edges[j].a());
+        side.push_back(tip);
+
+        edges[j].outside()->bondNieghborOneSide(edges[j].outsideIndex(), side);
+        side.bondNieghborOneSide(0, *(edges[j].outside()));
+        if (j > 0) {
+            side.bondNieghborOneSide(1, (*this)[size() - 1]);
+            (*this)[size() - 1].bondNieghborOneSide(2, side);
+        }
+        side.bondNieghborOneSide(2, (*this)[size() - edges.size()]);
+        (*this)[size() - edges.size()].bondNieghborOneSide(1, side);
+
+        push_back(side);
+    }
 }
 
 
+void ConvexHull::initConflictGraph(vector<SmartPoint> points) {
+    vector<SmartPoint*> smartPointPointers;
+    for(int i = 0; i < points.size(); i++)
+        smartPointPointers.push_back(&points[i]);
+    for (int i = 0; i < size(); i++)
+        (*this)[i].initPoints(smartPointPointers);
+}
 
+void ConvexHull::setHorizon(vector<Edge>& horizon, SmartPoint& star) {
+    
+    Edge search(0, star.facets[0]);
+    
+    while(search.outside()->faces(star)) {
+        search.flip();
+        search.changeDir();
+        search.progress();        
+    }
+    
+    horizon.push_back(Edge(search));
+    
+    for(search.progress(); !(search == horizon[0]); search.progress()){
+        if(search.outside()->faces(star)){
+            search.flip();
+            search.progress();
+        }
+        horizon.push_back(Edge(search));
+    }    
+}
 
+void ConvexHull::removeFace(SmartPoint& star) {
+    for(int i = 0; i < star.facets.size(); i++) {
+        (*star.facets[i]).disable();
+    }
+}
 
+void ConvexHull::updateConflifctGraph(vector<Edge>& horizon, SmartPoint& star) {
+    vector<SmartPoint> starbin;
+    for(int i = 0; i < star.facets.size(); i++){
+        for(int j = 0; j < (*star.facets[i]).size(); j++){
+            starbin.push_back((*star.facets[i])[j]);
+        }
+        (*star.facets[i]).decouple();
+    }
+    for(int i = 0; i < horizon.size(); i++){
+        for(int j = 0; j <horizon[i].outside()->size(); j++){
+            starbin.push_back((*horizon[i].outside())[j]);
+        }
+    }
+    
+    for(int i = 0; i < horizon.size(); i++)
+        for(int j = 0; j < starbin.size(); j++)
+            if((*this)[size() - i].faces(starbin[j])) {
+                starbin[j].bondFacet((*this)[size() - i]);
+            }
+}
 
-
-
-
-
-
-
-
-
-
-//
-//ConvexHull::ConvexHull(const ConvexHull& orig) {
-//}
-//
-//ConvexHull::~ConvexHull() {
-//}
-
+void ConvexHull::removeDisabledFacets() {
+    int shift = 0;
+    for(int i = 0; i < size() - shift; i++){
+        if(!(*this)[i].enabled()) shift++;
+        (*this)[i] = (*this)[i + shift];
+    }
+    for(int i = 0; i < shift; i++) pop_back();
+        
+}

@@ -1,11 +1,3 @@
-
-/* 
- * File:   Facet.cpp
- * Author: dov
- * 
- * Created on April 4, 2018, 5:31 PM
- */
-
 #include "Facet.h"
 
 Point Facet::normal() const {

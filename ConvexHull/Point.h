@@ -1,28 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
- * File:   Point.h
- * Author: dov
- *
- * Created on April 2, 2018, 1:02 PM
- */
-
-
-
-#ifndef POINT_H
-#define POINT_H
-
+#pragma once
 #include <iostream>
 
 class Point {
 public:
     //Point();
     
-
     double x, y, z;
     static constexpr double EPSILON = 1e-7;
     
@@ -52,4 +34,3 @@ private:
 
 };
 
-#endif /* POINT_H */

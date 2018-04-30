@@ -1,35 +1,25 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+#pragma once
 
-/* 
- * File:   SmartFacet.h
- * Author: dov
- *
- * Created on April 25, 2018, 5:26 PM
- */
+#include <vector>
+#include "Facet.h"
 
-#ifndef SMARTFACET_H
-#define SMARTFACET_H
-
-#include "smartPoint.h"
-
+class SmartPoint;
 
 class SmartFacet: public Facet {
 public:
-    void bondPoint(const SmartPoint& p);
-    void initPoints(const std::vector<SmartPoint>& points);
+    std::vector<SmartFacet*> neigbors;
+    
+    void bondPoint(SmartPoint& p);
+    void initPoints(std::vector<SmartPoint*>& points);
     void decouple();
-    void bondNeighbor(const SmartFacet& f);
-    void bondNieghborOneSide(int i, const SmartFacet& f);
+    
+    void bondNieghborOneSide(int i, SmartFacet& f);
+    void disable();
+    bool enabled();
+    
 private:
     friend SmartPoint;
-    std::vector<SmartPoint> points;
-    std::vector<SmartFacet> neigbors;
+    std::vector<SmartPoint*> points;    
+    bool isEnabled = true;
     
 };
-
-#endif /* SMARTFACET_H */
-
