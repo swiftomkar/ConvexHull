@@ -62,18 +62,20 @@ void ConvexHull::pyramid(SmartPoint& tip) {
 
     for (int j = 0; j < (*this)[0].size(); j++) {
         SmartFacet side;
-        side.push_back((*this)[0][(j + 1) % (*this)[0].size()]);
-        side.push_back((*this)[0][j]);
-        side.push_back(tip);
+        this->push_back(side);
+        
+        (*this)[size() - 1].push_back((*this)[0][(j + 1) % (*this)[0].size()]);
+        (*this)[size() - 1].push_back((*this)[0][j]);
+        (*this)[size() - 1].push_back(tip);
 
-        (*this)[0].bondNieghbor(j, side);
-        side.bondNieghbor(0, (*this)[0]);
+        (*this)[0].bondNieghbor(j, (*this)[size() - 1]);
+        (*this)[size() - 1].bondNieghbor(0, (*this)[0]);
         if (j > 0) {
-            side.bondNieghbor(1, (*this)[size() - 1]);
-            (*this)[size() - 1].bondNieghbor(2, side);
+            (*this)[size() - 1].bondNieghbor(1, (*this)[size() - 2]);
+            (*this)[size() - 1].bondNieghbor(2, (*this)[size() - 1]);
         }
 
-        this->push_back(side);
+        
         //        (*this)[j+1] = side;
     }
     (*this)[size() - 1].bondNieghbor(2, (*this)[size() - (*this)[0].size()]);
@@ -84,18 +86,18 @@ void ConvexHull::pyramid(SmartPoint& tip) {
 void ConvexHull::cone(SmartPoint& tip, std::vector<Edge>& edges) {
     for (int j = 0; j < edges.size(); j++) {
         SmartFacet facet;
-        facet.push_back(edges[j].b());
-        facet.push_back(edges[j].a());
-        facet.push_back(tip);
+        push_back(facet);
+        (*this)[size() - 1].push_back(edges[j].b());
+        (*this)[size() - 1].push_back(edges[j].a());
+        (*this)[size() - 1].push_back(tip);
 
-        edges[j].outside()->bondNieghbor(edges[j].outsideIndex(), facet);
-        facet.bondNieghbor(0, *(edges[j].outside()));
+        edges[j].outside()->bondNieghbor(edges[j].outsideIndex(), (*this)[size() - 1]);
+        (*this)[size() - 1].bondNieghbor(0, *(edges[j].outside()));
         if (j > 0) {
-            facet.bondNieghbor(1, (*this)[size() - 1]);
-            (*this)[size() - 1].bondNieghbor(2, facet);
+            (*this)[size() - 1].bondNieghbor(1, (*this)[size() - 2]);
+            (*this)[size() - 1].bondNieghbor(2, (*this)[size() - 1]);
         }
 
-        push_back(facet);
     }
     (*this)[size() - 1].bondNieghbor(2, (*this)[size() - edges.size()]);
     (*this)[size() - edges.size()].bondNieghbor(1, (*this)[size() - 1]);
