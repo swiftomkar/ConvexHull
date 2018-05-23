@@ -34,7 +34,7 @@ int Edge::outsideIndex() const {
 }
 
 SmartFacet* Edge::outside() const{
-    return &(inside->neigbors[index]);
+    return inside->getNeigbor(index);
 }
 
 

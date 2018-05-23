@@ -6,12 +6,12 @@
 
 using namespace std;
 
-ConvexHull::ConvexHull(vector<SmartPoint> points) {
+ConvexHull::ConvexHull(vector<SmartPoint>& points) {
 
     int pointIndex = firstFacet(points);
-    pyramid(points[pointIndex], (*this)[0]);
-
-    initConflictGraph(vector<SmartPoint>(points.begin() + pointIndex + 1, points.begin() + points.size()));
+    pyramid(points[pointIndex]);
+    for (int i = 0; i < size(); i++)
+        (*this)[i].initPoints(points, pointIndex);
 
     while (++pointIndex < points.size()) {
         while (pointIndex < points.size() && points[pointIndex].inside()) pointIndex++;
@@ -46,120 +46,121 @@ int ConvexHull::firstFacet(vector<SmartPoint> points) {
 
     for (; pointsIndex < points.size(); pointsIndex++) {
         if (facet1.onPlane(points[pointsIndex])) facet1.addPoint(points[pointsIndex]);
+        else {
+            break;
+        }
     }
     push_back(facet1);
 
-    if (pointsIndex >= size()) throw "no polyhedron can be made from these points.";
+    if (pointsIndex >= points.size()) throw "no polyhedron can be made from these points.";
     return pointsIndex;
 }
 
-void ConvexHull::pyramid(SmartPoint& tip, SmartFacet& base) {
+void ConvexHull::pyramid(SmartPoint& tip) {
 
-    if (base.faces(tip)) base.flip();
+    if ((*this)[0].faces(tip)) (*this)[0].flip();
 
-    for (int j = 0; j < base.size(); j++) {
+    for (int j = 0; j < (*this)[0].size(); j++) {
         SmartFacet side;
-        side.push_back(base[(j + 1) % base.size()]);
-        side.push_back(base[j]);
+        side.push_back((*this)[0][(j + 1) % (*this)[0].size()]);
+        side.push_back((*this)[0][j]);
         side.push_back(tip);
 
-        base.bondNieghborOneSide(j, side);
-        side.bondNieghborOneSide(0, base);
+        (*this)[0].bondNieghbor(j, side);
+        side.bondNieghbor(0, (*this)[0]);
         if (j > 0) {
-            side.bondNieghborOneSide(1, (*this)[size() - 1]);
-            (*this)[size() - 1].bondNieghborOneSide(2, side);
+            side.bondNieghbor(1, (*this)[size() - 1]);
+            (*this)[size() - 1].bondNieghbor(2, side);
         }
-        side.bondNieghborOneSide(2, (*this)[size() - base.size()]);
-        (*this)[size() - base.size()].bondNieghborOneSide(1, side);
 
-        push_back(side);
+        this->push_back(side);
+        //        (*this)[j+1] = side;
     }
+    (*this)[size() - 1].bondNieghbor(2, (*this)[size() - (*this)[0].size()]);
+    (*this)[size() - (*this)[0].size()].bondNieghbor(1, (*this)[size() - 1]);
 
 }
 
-void ConvexHull::cone(SmartPoint& tip, std::vector<Edge>& edges){
+void ConvexHull::cone(SmartPoint& tip, std::vector<Edge>& edges) {
     for (int j = 0; j < edges.size(); j++) {
-        SmartFacet side;
-        side.push_back(edges[j].b());
-        side.push_back(edges[j].a());
-        side.push_back(tip);
+        SmartFacet facet;
+        facet.push_back(edges[j].b());
+        facet.push_back(edges[j].a());
+        facet.push_back(tip);
 
-        edges[j].outside()->bondNieghborOneSide(edges[j].outsideIndex(), side);
-        side.bondNieghborOneSide(0, *(edges[j].outside()));
+        edges[j].outside()->bondNieghbor(edges[j].outsideIndex(), facet);
+        facet.bondNieghbor(0, *(edges[j].outside()));
         if (j > 0) {
-            side.bondNieghborOneSide(1, (*this)[size() - 1]);
-            (*this)[size() - 1].bondNieghborOneSide(2, side);
+            facet.bondNieghbor(1, (*this)[size() - 1]);
+            (*this)[size() - 1].bondNieghbor(2, facet);
         }
-        side.bondNieghborOneSide(2, (*this)[size() - edges.size()]);
-        (*this)[size() - edges.size()].bondNieghborOneSide(1, side);
 
-        push_back(side);
+        push_back(facet);
     }
-}
-
-
-void ConvexHull::initConflictGraph(vector<SmartPoint> points) {
-    vector<SmartPoint*> smartPointPointers;
-    for(int i = 0; i < points.size(); i++)
-        smartPointPointers.push_back(&points[i]);
-    for (int i = 0; i < size(); i++)
-        (*this)[i].initPoints(smartPointPointers);
+    (*this)[size() - 1].bondNieghbor(2, (*this)[size() - edges.size()]);
+    (*this)[size() - edges.size()].bondNieghbor(1, (*this)[size() - 1]);
 }
 
 void ConvexHull::setHorizon(vector<Edge>& horizon, SmartPoint& star) {
-    
+
     Edge search(0, star.facets[0]);
-    
-    while(search.outside()->faces(star)) {
+
+    while (search.outside()->faces(star)) {
         search.flip();
         search.changeDir();
-        search.progress();        
+        search.progress();
     }
-    
+
     horizon.push_back(Edge(search));
-    
-    for(search.progress(); !(search == horizon[0]); search.progress()){
-        if(search.outside()->faces(star)){
+
+    for (search.progress(); !(search == horizon[0]); search.progress()) {
+        if (search.outside()->faces(star)) {
             search.flip();
             search.progress();
         }
         horizon.push_back(Edge(search));
-    }    
+    }
 }
 
 void ConvexHull::removeFace(SmartPoint& star) {
-    for(int i = 0; i < star.facets.size(); i++) {
+    for (int i = 0; i < star.facets.size(); i++) {
         (*star.facets[i]).disable();
     }
 }
 
 void ConvexHull::updateConflifctGraph(vector<Edge>& horizon, SmartPoint& star) {
     vector<SmartPoint> starbin;
-    for(int i = 0; i < star.facets.size(); i++){
-        for(int j = 0; j < (*star.facets[i]).size(); j++){
+    for (int i = 0; i < star.facets.size(); i++) {
+        for (int j = 0; j < (*star.facets[i]).size(); j++) {
             starbin.push_back((*star.facets[i])[j]);
         }
         (*star.facets[i]).decouple();
     }
-    for(int i = 0; i < horizon.size(); i++){
-        for(int j = 0; j <horizon[i].outside()->size(); j++){
+    for (int i = 0; i < horizon.size(); i++) {
+        for (int j = 0; j < horizon[i].outside()->size(); j++) {
             starbin.push_back((*horizon[i].outside())[j]);
         }
     }
-    
-    for(int i = 0; i < horizon.size(); i++)
-        for(int j = 0; j < starbin.size(); j++)
-            if((*this)[size() - i].faces(starbin[j])) {
+
+    for (int i = 0; i < horizon.size(); i++)
+        for (int j = 0; j < starbin.size(); j++)
+            if ((*this)[size() - i].faces(starbin[j])) {
                 starbin[j].bondFacet((*this)[size() - i]);
             }
 }
 
 void ConvexHull::removeDisabledFacets() {
     int shift = 0;
-    for(int i = 0; i < size() - shift; i++){
-        if(!(*this)[i].enabled()) shift++;
+    for (int i = 0; i < size() - shift; i++) {
+        if (!(*this)[i].enabled()) shift++;
         (*this)[i] = (*this)[i + shift];
     }
-    for(int i = 0; i < shift; i++) pop_back();
-        
+    for (int i = 0; i < shift; i++) pop_back();
+
+}
+
+ostream& operator<<(ostream& os, ConvexHull ch) {
+    for (int i = 0; i < ch.size(); i++)
+        os << ch[i] << endl;
+    return os;
 }

@@ -32,7 +32,7 @@ Point Point::cross(const Point& p) const {
     return Point(y * p.z - z * p.y, z * p.x - x * p.z, x * p.y - y * p.x);
 }
 
-Point Point::operator*(double t) const {
+Point Point::operator*(const double t) const {
     return Point(x*t, y*t, z * t);
 }
 

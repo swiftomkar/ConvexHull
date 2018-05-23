@@ -7,10 +7,10 @@ void SmartFacet::bondPoint(SmartPoint& p) {
     p.facets.push_back(this);
 }
 
-void SmartFacet::initPoints(std::vector<SmartPoint*>& points) {
-    for (int i = 0; i < points.size(); i++)
-        if (faces(*(points[i]))) 
-            bondPoint(*points[i]);
+void SmartFacet::initPoints(std::vector<SmartPoint>& points, int start) {
+    for (int i = start; i < points.size(); i++)
+        if (faces(points[i])) 
+            bondPoint(points[i]);
 }
 
 void SmartFacet::decouple() {//I'm not sure I need this.
@@ -31,9 +31,10 @@ void SmartFacet::decouple() {//I'm not sure I need this.
 
 }
 
-void SmartFacet::bondNieghborOneSide(int i, SmartFacet& f) {
-    while (i <= size()) neigbors.push_back(nullptr);
-    neigbors[i] = &f;
+void SmartFacet::bondNieghbor(int side, SmartFacet& f) {
+    while (side >= neighbors.size()) 
+        neighbors.push_back(nullptr);
+    neighbors[side] = &f;
 }
 
 void SmartFacet::disable() {
@@ -44,4 +45,7 @@ bool SmartFacet::enabled() {
     return isEnabled;
 }
 
+SmartFacet* SmartFacet::getNeigbor(int i) {
+    return neighbors[i];
+}
 

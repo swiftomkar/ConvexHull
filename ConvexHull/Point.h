@@ -20,7 +20,7 @@ public:
     
     Point operator +(const Point& p) const;
     Point operator -(const Point& p) const;
-    Point operator *(double t) const;
+    Point operator *(const double t) const;
     bool operator ==(const Point& p) const;
     Point operator =(const Point& p);
     
