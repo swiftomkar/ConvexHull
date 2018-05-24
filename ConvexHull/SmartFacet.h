@@ -2,6 +2,7 @@
 
 #include <vector>
 #include "Facet.h"
+#include "SmartPoint.h"
 
 class SmartPoint;
 
@@ -16,12 +17,11 @@ public:
     void disable();
     bool enabled();
     
-    SmartFacet* getNeigbor(int i);
+    std::vector<SmartPoint*> facingPoints;
     
+    SmartFacet* getNeighbor(int i);
 private:
-    friend SmartPoint;
-    std::vector<SmartPoint*> points;    
+    friend SmartPoint;    
     bool isEnabled = true;
     std::vector<SmartFacet*> neighbors;
-    
 };

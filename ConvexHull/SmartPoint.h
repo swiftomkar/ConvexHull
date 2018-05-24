@@ -19,6 +19,6 @@ public:
     SmartPoint(Point p): Point(p){}
     
     void decouple();
-    bool inside();
+    bool inside() const;
     
 };

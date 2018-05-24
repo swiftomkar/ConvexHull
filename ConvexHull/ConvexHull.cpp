@@ -10,20 +10,19 @@ ConvexHull::ConvexHull(vector<SmartPoint>& points) {
 
     int pointIndex = firstFacet(points);
     pyramid(points[pointIndex++]);
-    
-    for (int i = 0; i < size(); i++)
+
+    for (int i = 0; i < size(); i++) 
         (*this)[i].initPoints(points, pointIndex);
 
-    while (pointIndex++ < points.size()) {
-        while (pointIndex < points.size() && points[pointIndex].inside()) pointIndex++;
-        if (pointIndex == points.size()) break;
- 
-        vector<Edge> horizon;
-        setHorizon(horizon, points[pointIndex]);
-        cone(points[pointIndex], horizon);
-        removeFace(points[pointIndex]);
-        updateConflifctGraph(horizon, points[pointIndex]);
-    }
+        for (;pointIndex < points.size(); pointIndex++) {
+            if (pointIndex < points.size() && points[pointIndex].inside()) continue;
+     
+            vector<Edge> horizon;
+            setHorizon(horizon, points[pointIndex]);
+            cone(points[pointIndex], horizon);
+            removeFace(points[pointIndex]);
+            updateConflifctGraph(horizon, points[pointIndex]);
+        }
 
 }
 
@@ -64,7 +63,7 @@ void ConvexHull::pyramid(SmartPoint& tip) {
     for (int j = 0; j < (*this)[0].size(); j++) {
         SmartFacet side;
         push_back(side);
-        
+
         (*this)[size() - 1].push_back((*this)[0][(j + 1) % (*this)[0].size()]);
         (*this)[size() - 1].push_back((*this)[0][j]);
         (*this)[size() - 1].push_back(tip);
@@ -76,7 +75,7 @@ void ConvexHull::pyramid(SmartPoint& tip) {
             (*this)[size() - 1].bondNieghbor(2, (*this)[size() - 1]);
         }
 
-        
+
         //        (*this)[j+1] = side;
     }
     (*this)[size() - 1].bondNieghbor(2, (*this)[size() - (*this)[0].size()]);

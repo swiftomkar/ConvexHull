@@ -28,9 +28,10 @@ public:
     double mag() const;
     double magSquared()const;
     double d(const Point& p)const;    
+    
+    friend std::ostream& operator <<(std::ostream& os, const Point& p);
    
 private:
     bool inBetween(const Point& a, const Point& b) const;
-
 };
 
