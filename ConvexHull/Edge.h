@@ -26,6 +26,7 @@ public:
     
     SmartFacet* outside() const;
     
+    friend std::ostream& operator <<(std::ostream& os, const Edge& e);
 private:
     int index;
     int indexDir = 1;

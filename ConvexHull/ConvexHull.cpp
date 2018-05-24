@@ -7,23 +7,25 @@
 using namespace std;
 
 ConvexHull::ConvexHull(vector<SmartPoint>& points) {
-
+    reserve(2 * points.size());
     int pointIndex = firstFacet(points);
+
     pyramid(points[pointIndex++]);
 
-    for (int i = 0; i < size(); i++) 
+    for (int i = 0; i < size(); i++)
         (*this)[i].initPoints(points, pointIndex);
 
-        for (;pointIndex < points.size(); pointIndex++) {
-            if (pointIndex < points.size() && points[pointIndex].inside()) continue;
-     
-            vector<Edge> horizon;
-            setHorizon(horizon, points[pointIndex]);
-            cone(points[pointIndex], horizon);
-            removeFace(points[pointIndex]);
-            updateConflifctGraph(horizon, points[pointIndex]);
-        }
+    for (; pointIndex < points.size(); pointIndex++) {
+        if (pointIndex < points.size() && points[pointIndex].inside()) continue;
 
+        vector<Edge> horizon;
+        setHorizon(horizon, points[pointIndex]);
+
+        cone(points[pointIndex], horizon);
+        removeFace(points[pointIndex]);
+        updateConflifctGraph(horizon, points[pointIndex]);
+    }
+    removeDisabledFacets();
 }
 
 int ConvexHull::firstFacet(vector<SmartPoint> points) {
@@ -74,9 +76,6 @@ void ConvexHull::pyramid(SmartPoint& tip) {
             (*this)[size() - 1].bondNieghbor(1, (*this)[size() - 2]);
             (*this)[size() - 1].bondNieghbor(2, (*this)[size() - 1]);
         }
-
-
-        //        (*this)[j+1] = side;
     }
     (*this)[size() - 1].bondNieghbor(2, (*this)[size() - (*this)[0].size()]);
     (*this)[size() - (*this)[0].size()].bondNieghbor(1, (*this)[size() - 1]);
@@ -84,9 +83,12 @@ void ConvexHull::pyramid(SmartPoint& tip) {
 }
 
 void ConvexHull::cone(SmartPoint& tip, std::vector<Edge>& edges) {
+
     for (int j = 0; j < edges.size(); j++) {
+
         SmartFacet facet;
         push_back(facet);
+
         (*this)[size() - 1].push_back(edges[j].b());
         (*this)[size() - 1].push_back(edges[j].a());
         (*this)[size() - 1].push_back(tip);
@@ -115,17 +117,19 @@ void ConvexHull::setHorizon(vector<Edge>& horizon, SmartPoint& star) {
 
     horizon.push_back(Edge(search));
 
-    for (search.progress(); !(search == horizon[0]); search.progress()) {
+    for (search.progress(); !(horizon[0] == search); search.progress()) {
         while (search.outside()->faces(star)) {
             search.flip();
             search.progress();
         }
+        if (horizon[0] == search) break;
         horizon.push_back(Edge(search));
     }
 }
 
 void ConvexHull::removeFace(SmartPoint& star) {
     for (int i = 0; i < star.facingFacets.size(); i++) {
+        //        cout << "disabling\n" << *star.facingFacets[i] << endl;
         (*star.facingFacets[i]).disable();
     }
 }
@@ -154,8 +158,11 @@ void ConvexHull::updateConflifctGraph(vector<Edge>& horizon, SmartPoint& star) {
 void ConvexHull::removeDisabledFacets() {
     int shift = 0;
     for (int i = 0; i < size() - shift; i++) {
-        if (!(*this)[i].enabled()) shift++;
-        (*this)[i] = (*this)[i + shift];
+        if (!(*this)[i + shift].enabled()) {
+            shift++;
+            i--;
+        }
+        else (*this)[i] = (*this)[i + shift];
     }
     for (int i = 0; i < shift; i++) pop_back();
 

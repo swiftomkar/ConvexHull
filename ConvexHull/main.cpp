@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
         
     ConvexHull ch(points);
     
-//    cout << ch;
+    cout << ch;
 
     return 0;
 }
