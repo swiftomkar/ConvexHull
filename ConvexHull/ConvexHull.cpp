@@ -17,6 +17,9 @@ ConvexHull::ConvexHull(vector<SmartPoint>& points) {
         while (pointIndex < points.size() && points[pointIndex].inside()) pointIndex++;
         if (pointIndex == points.size()) break;
 
+        cout << "booo";
+        cout<<points[pointIndex].facets[0] << "  test  " << points[pointIndex].facets.size();
+        
         vector<Edge> horizon;
         setHorizon(horizon, points[pointIndex]);
         cone(points[pointIndex], horizon);
@@ -62,7 +65,7 @@ void ConvexHull::pyramid(SmartPoint& tip) {
 
     for (int j = 0; j < (*this)[0].size(); j++) {
         SmartFacet side;
-        this->push_back(side);
+        push_back(side);
         
         (*this)[size() - 1].push_back((*this)[0][(j + 1) % (*this)[0].size()]);
         (*this)[size() - 1].push_back((*this)[0][j]);
@@ -116,7 +119,7 @@ void ConvexHull::setHorizon(vector<Edge>& horizon, SmartPoint& star) {
     horizon.push_back(Edge(search));
 
     for (search.progress(); !(search == horizon[0]); search.progress()) {
-        if (search.outside()->faces(star)) {
+        while (search.outside()->faces(star)) {
             search.flip();
             search.progress();
         }

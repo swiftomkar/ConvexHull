@@ -17,7 +17,7 @@ void Edge::changeDir() {
 }
 
 bool Edge::operator==(const Edge& e) const {
-    return inside == e.inside && outside() == e.outside();
+    return (a() == e.a() && b() == e.b ()) || (a() == e.b() && b() == e.a());
 }
 
 Point Edge::a() const{
