@@ -4,7 +4,7 @@
 
 void SmartFacet::bondPoint(SmartPoint& p) {
     points.push_back(&p);
-    p.facets.push_back(this);
+    p.facingFacets.push_back(this);
 }
 
 void SmartFacet::initPoints(std::vector<SmartPoint>& points, int start) {
@@ -23,9 +23,9 @@ void SmartFacet::decouple() {//I'm not sure I need this.
 //                }
 
         for (int i = 0; i < points.size(); i++)
-            for (int j = 0; j < points[i]->facets.size(); j++)
-                if (points[i]->facets[j] == this) {
-                    points[i]->facets.erase(points[i]->facets.begin() + j);
+            for (int j = 0; j < points[i]->facingFacets.size(); j++)
+                if (points[i]->facingFacets[j] == this) {
+                    points[i]->facingFacets.erase(points[i]->facingFacets.begin() + j);
                     break;
                 }
 

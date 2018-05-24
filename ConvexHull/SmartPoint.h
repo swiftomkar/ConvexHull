@@ -11,7 +11,7 @@ using namespace std;
 class SmartPoint: public Point {
 public:
         
-    vector<SmartFacet*> facets;   
+    vector<SmartFacet*> facingFacets;   
         
     void bondFacet(SmartFacet& f);
 

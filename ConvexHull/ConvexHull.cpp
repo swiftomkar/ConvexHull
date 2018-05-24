@@ -9,17 +9,15 @@ using namespace std;
 ConvexHull::ConvexHull(vector<SmartPoint>& points) {
 
     int pointIndex = firstFacet(points);
-    pyramid(points[pointIndex]);
+    pyramid(points[pointIndex++]);
+    
     for (int i = 0; i < size(); i++)
         (*this)[i].initPoints(points, pointIndex);
 
-    while (++pointIndex < points.size()) {
+    while (pointIndex++ < points.size()) {
         while (pointIndex < points.size() && points[pointIndex].inside()) pointIndex++;
         if (pointIndex == points.size()) break;
-
-        cout << "booo";
-        cout<<points[pointIndex].facets[0] << "  test  " << points[pointIndex].facets.size();
-        
+ 
         vector<Edge> horizon;
         setHorizon(horizon, points[pointIndex]);
         cone(points[pointIndex], horizon);
@@ -108,7 +106,7 @@ void ConvexHull::cone(SmartPoint& tip, std::vector<Edge>& edges) {
 
 void ConvexHull::setHorizon(vector<Edge>& horizon, SmartPoint& star) {
 
-    Edge search(0, star.facets[0]);
+    Edge search(0, star.facingFacets[0]);
 
     while (search.outside()->faces(star)) {
         search.flip();
@@ -128,18 +126,18 @@ void ConvexHull::setHorizon(vector<Edge>& horizon, SmartPoint& star) {
 }
 
 void ConvexHull::removeFace(SmartPoint& star) {
-    for (int i = 0; i < star.facets.size(); i++) {
-        (*star.facets[i]).disable();
+    for (int i = 0; i < star.facingFacets.size(); i++) {
+        (*star.facingFacets[i]).disable();
     }
 }
 
 void ConvexHull::updateConflifctGraph(vector<Edge>& horizon, SmartPoint& star) {
     vector<SmartPoint> starbin;
-    for (int i = 0; i < star.facets.size(); i++) {
-        for (int j = 0; j < (*star.facets[i]).size(); j++) {
-            starbin.push_back((*star.facets[i])[j]);
+    for (int i = 0; i < star.facingFacets.size(); i++) {
+        for (int j = 0; j < (*star.facingFacets[i]).size(); j++) {
+            starbin.push_back((*star.facingFacets[i])[j]);
         }
-        (*star.facets[i]).decouple();
+        (*star.facingFacets[i]).decouple();
     }
     for (int i = 0; i < horizon.size(); i++) {
         for (int j = 0; j < horizon[i].outside()->size(); j++) {
