@@ -19,7 +19,6 @@ private:
     void cone(SmartPoint& p, vector<Edge>& edges);
     int firstFacet(vector<SmartPoint> points);    
     void setHorizon(vector<Edge>& horizon, SmartPoint& star);
-    void removeFace(SmartPoint& star);
     void updateConflifctGraph(vector<Edge>& horizon, SmartPoint& star);
     void removeDisabledFacets();
 

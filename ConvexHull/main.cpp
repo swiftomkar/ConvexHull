@@ -19,10 +19,13 @@ int main(int argc, char** argv) {
     points.push_back(SmartPoint(0,0,0));
     
     points.push_back(SmartPoint(-1,-1,-1));
+    points.push_back(SmartPoint(-2,-2,-2));
+    points.push_back(SmartPoint(-5,-5,-5));
+    points.push_back(SmartPoint(7,7,7));
         
     ConvexHull ch(points);
     
-    cout << ch;
+    cout << endl << "result: " << endl << ch << endl;
 
     return 0;
 }

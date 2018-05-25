@@ -9,15 +9,16 @@ class SmartPoint;
 class SmartFacet: public Facet {
 public:    
     
+    SmartFacet(int expectedSize);
+    
     void bondPoint(SmartPoint& p);
     void initPoints(std::vector<SmartPoint>& points, int start);
-    void decouple();
     
     void bondNieghbor(int i, SmartFacet& f);
     void disable();
     bool enabled();
     
-    std::vector<SmartPoint*> facingPoints;
+    std::vector<SmartPoint*> sky;
     
     SmartFacet* getNeighbor(int i);
 private:

@@ -8,6 +8,7 @@ class Edge {
 public:
     
     SmartFacet* inside;
+    SmartFacet* replacementInside;
     
     
     Edge(int i, SmartFacet* inside):index(i), inside(inside){}
