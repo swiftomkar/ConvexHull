@@ -15,14 +15,13 @@ using namespace std;
 class ConvexHull : public vector<SmartFacet> {
 public:
     ConvexHull(vector<SmartPoint>& points);
-    friend ostream& operator << (ostream& os, ConvexHull ch);
+    friend ostream& operator << (ostream& os, const ConvexHull& ch);
     
 private:
-    void pyramid(SmartPoint& p);
-    void cone(SmartPoint& p, vector<Edge>& edges);
-    int firstFacet(vector<SmartPoint> points);    
-    void setHorizon(vector<Edge>& horizon, SmartPoint& star);
-    void updateConflifctGraph(vector<Edge>& horizon, SmartPoint& star);
+    void pyramid(const SmartPoint& p);
+    void cone(const SmartPoint& p, vector<Edge>& edges);
+    int firstFacet(const vector<SmartPoint>& points);    
+    void setHorizon(vector<Edge>& horizon, const SmartPoint& star);
+    void updateConflifctGraph(const vector<Edge>& horizon, SmartPoint& star);
     void removeDisabledFacets();
-
 };

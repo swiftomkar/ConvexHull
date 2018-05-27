@@ -3,7 +3,7 @@
  */
 
 #include <unordered_set>
-
+#include<assert.h>
 #include "ConvexHull.h"
 #include "SmartPoint.h"
 #include "Edge.h"
@@ -15,7 +15,7 @@ using namespace std;
  * @param points The points to be encompassed by this convex hull.
  */
 ConvexHull::ConvexHull(vector<SmartPoint>& points) {
-    reserve(2 * points.size());
+    reserve(2 * points.size() * points.size());
     int pointIndex = firstFacet(points);
 
     pyramid(points[pointIndex++]);
@@ -29,7 +29,6 @@ ConvexHull::ConvexHull(vector<SmartPoint>& points) {
 
         vector<Edge> horizon;
         setHorizon(horizon, points[pointIndex]);
-
         cone(points[pointIndex], horizon);
         updateConflifctGraph(horizon, points[pointIndex]);
     }
@@ -43,7 +42,7 @@ ConvexHull::ConvexHull(vector<SmartPoint>& points) {
  * facet taken from.
  * @return the index of the first point not in the first facet.
  */
-int ConvexHull::firstFacet(vector<SmartPoint> points) {
+int ConvexHull::firstFacet(const vector<SmartPoint>& points) {
     SmartFacet facet1(5);
     int pointsIndex = 0;
     facet1.push_back(points[pointsIndex++]);
@@ -78,7 +77,7 @@ int ConvexHull::firstFacet(vector<SmartPoint> points) {
  * Makes the first pyramid and adds the facets to this.
  * @param tip the point at the top of the pyramid.
  */
-void ConvexHull::pyramid(SmartPoint& tip) {
+void ConvexHull::pyramid(const SmartPoint& tip) {
 
     if ((*this)[0].faces(tip)) (*this)[0].flip();
 
@@ -111,12 +110,13 @@ void ConvexHull::pyramid(SmartPoint& tip) {
  * @param edges The edges on the convex hull at the base of the cone to be added
  * .  These are also the edge of the convex hull that is visable from the point.
  */
-void ConvexHull::cone(SmartPoint& tip, std::vector<Edge>& edges) {
+void ConvexHull::cone(const SmartPoint& tip, std::vector<Edge>& edges) {
 
     for (int i = 0; i < edges.size(); i++) {
-
         push_back(SmartFacet(3));
+
         edges[i].replacementInside = &((*this)[size() - 1]);
+
         (*this)[size() - 1].push_back(edges[i].a());
         (*this)[size() - 1].push_back(edges[i].b());
         (*this)[size() - 1].push_back(tip);
@@ -127,8 +127,8 @@ void ConvexHull::cone(SmartPoint& tip, std::vector<Edge>& edges) {
             (*this)[size() - 1].setNieghbor(2, (*this)[size() - 2]);
             (*this)[size() - 2].setNieghbor(1, (*this)[size() - 1]);
         }
-
     }
+
     (*this)[size() - 1].setNieghbor(1, (*this)[size() - edges.size()]);
     (*this)[size() - edges.size()].setNieghbor(2, (*this)[size() - 1]);
 }
@@ -141,7 +141,7 @@ void ConvexHull::cone(SmartPoint& tip, std::vector<Edge>& edges) {
  * @param star the point from which those edges make up the horizon.
  * 
  */
-void ConvexHull::setHorizon(vector<Edge>& horizon, SmartPoint& star) {
+void ConvexHull::setHorizon(vector<Edge>& horizon, const SmartPoint& star) {
 
     Edge search(0, star.facingFacets[0]);
 
@@ -164,7 +164,7 @@ void ConvexHull::setHorizon(vector<Edge>& horizon, SmartPoint& star) {
  * @param horizon the most recent horizon used to add a cone.
  * @param departingStar the point at the tip of the cone most recently added.
  */
-void ConvexHull::updateConflifctGraph(vector<Edge>& horizon, SmartPoint& departingStar) {
+void ConvexHull::updateConflifctGraph(const vector<Edge>& horizon, SmartPoint& departingStar) {
 
     while (departingStar.facingFacets.size() > 0) {
         departingStar.facingFacets[0]->disable();
@@ -216,7 +216,7 @@ void ConvexHull::removeDisabledFacets() {
  * @param ch the convex hull to be printed.
  * @return the ostream.
  */
-ostream& operator<<(ostream& os, ConvexHull ch) {
+ostream& operator<<(ostream& os, const ConvexHull& ch) {
     for (int i = 0; i < ch.size(); i++) {
         //        if (!ch[i].enabled()) continue;
         os << ch[i] << endl;

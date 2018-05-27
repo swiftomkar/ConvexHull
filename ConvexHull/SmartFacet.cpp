@@ -61,7 +61,7 @@ void SmartFacet::disable() {
  * Is the facet enabled
  * @return true if it's enabled, false otherwise.
  */
-bool SmartFacet::enabled() {
+bool SmartFacet::enabled() const{
     return isEnabled;
 }
 
@@ -80,33 +80,4 @@ SmartFacet* SmartFacet::getNeighbor(int i){
  */
 SmartFacet::SmartFacet(int expectedSize) {
     reserve(expectedSize);
-}
-
-/**
- * Checks to see if all the neighbors are properly placed. 
- * @return true if all the neighbors are in the correct positions.
- */
-bool SmartFacet::verifyNeighbors(){
-    for (int i = 0; i < size(); i++) 
-        if(!verifyNeighbor(i)) return false;
-    return true;
-}
-
-/**
- * checks to see if the given neighbor belongs at the given index
- * @param i the index of the neighbor to check and the index of the side of that
- * neighbor.
- * @return true if the neighbor with index i belongs at edge i
- */
-bool SmartFacet::verifyNeighbor(int i) {
-
-    Edge e(i, this);
-    cout << "verifying " << e << endl;
-    for (int j = 0; j < neighbors[i]->size(); j++) {
-        if (e == Edge(j, neighbors[i])){
-            cout << e << " = " << Edge(j, neighbors[i]) << endl;
-            return true;
-        } else cout << e << " != " << Edge(j, neighbors[i]) << endl;
-    }
-    return false;
 }

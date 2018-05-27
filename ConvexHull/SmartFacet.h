@@ -21,16 +21,15 @@ public:
     
     void setNieghbor(int i, SmartFacet& f);
     void disable();
-    bool enabled();
+    bool enabled() const;
     
     std::vector<SmartPoint*> sky;
     
     SmartFacet* getNeighbor(int i);
     
-    bool verifyNeighbors();
 private:
     friend SmartPoint;    
     bool isEnabled = true;
     std::vector<SmartFacet*> neighbors;
-    bool verifyNeighbor(int i);
+    
 };
