@@ -1,9 +1,14 @@
-#pragma once
 
+#pragma once
 #include <vector>
 #include "Point.h"
 #include <ostream>
 
+/**
+ * @author Dov Neimand
+ * Describes a facet or polygon in 3d space.  The points must be in counter 
+ * clockwise order and convex.
+ */
 class Facet: public std::vector<Point> {
 public: 
 
@@ -15,8 +20,6 @@ public:
     void addPoint(const Point& p);
     void flip();
     
-    
-    bool operator ==(const Facet& f) const;
     friend std::ostream& operator <<(std::ostream& os, Facet f);
 
 };

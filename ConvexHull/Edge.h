@@ -1,9 +1,13 @@
 #pragma once
-
 #include "SmartFacet.h"
 #include "Point.h"
 
-
+/**
+ * @author Dov Neimand
+ * Describes an edge on the surface of the convex hull.
+ * Since the edges are often used to generate new cones, this class also
+ * can keep track of a replacement edges.
+ */
 class Edge {
 public:
     

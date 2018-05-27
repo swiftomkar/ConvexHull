@@ -1,5 +1,3 @@
-
-
 #include <cstdlib>
 
 #include "ConvexHull.h"
@@ -21,8 +19,10 @@ int main(int argc, char** argv) {
     points.push_back(SmartPoint(-1,-1,-1));
     points.push_back(SmartPoint(-2,-2,-2));
     points.push_back(SmartPoint(-5,-5,-5));
-    points.push_back(SmartPoint(7,7,7));
+    
+    points.push_back(SmartPoint(-800,-800, 6));
         
+    
     ConvexHull ch(points);
     
     cout << endl << "result: " << endl << ch << endl;
