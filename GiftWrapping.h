@@ -13,7 +13,7 @@
 
 class GiftWrapping: public ConvexHull {
 public:
-    GiftWrapping(ConvexHull a, ConvexHull b);
+    GiftWrapping(ConvexHull& a, ConvexHull& b);
 private:
 
 };
