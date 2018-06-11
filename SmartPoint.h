@@ -14,8 +14,9 @@ public:
         
     vector<SmartFacet*> facingFacets;   
         
-    SmartPoint(double x, double y, double z):Point(x, y, z) {}
-    SmartPoint(Point p): Point(p){}
+    SmartPoint(double x, double y, double z);
+    SmartPoint(const vector<double>& vec, int index);
+    SmartPoint(Point p);
     
     bool inside() const;
     

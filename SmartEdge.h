@@ -8,33 +8,39 @@
  * Since the edges are often used to generate new cones, this class also
  * can keep track of a replacement edges.
  */
-class Edge {
+class SmartEdge {
 public:
     
     SmartFacet* inside;
     SmartFacet* replacementInside;
+    SmartFacet* oldOutside;
     
-    
-    Edge(int i, SmartFacet* inside):index(i), inside(inside){}
-    Edge(const Edge& orig):index(orig.index), inside(orig.inside){}
+    SmartEdge(int i, SmartFacet* inside):index(i), inside(inside){}
+    SmartEdge(const SmartEdge& orig):index(orig.index), inside(orig.inside){}
     
     void progress();
     void flip();
     void changeDir();
+    void backUp();
     
-    bool operator ==(const Edge& e)const;
+    bool operator ==(const SmartEdge& e)const;
+    SmartEdge& operator =(const SmartEdge& e);
     
-    int outsideIndex() const;
+    int outsideIndex();
+    
+    int getIndex() const;
+    void setIndex(int i);
     
     Point a() const;
     Point b() const;
     
+    
     SmartFacet* outside() const;
     
-    friend std::ostream& operator <<(std::ostream& os, const Edge& e);
+    friend std::ostream& operator <<(std::ostream& os, const SmartEdge& e);
+    
 private:
     int index;
     int indexDir = 1;
 
 };
-

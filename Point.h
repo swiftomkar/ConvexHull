@@ -1,5 +1,7 @@
 #pragma once
 #include <iostream>
+#include <vector>
+#include <fstream>
 
 /**
  * @author Dov Neimand
@@ -12,6 +14,9 @@ public:
 
     double x, y, z;
     static constexpr double EPSILON = 1e-7;
+
+    Point() : x(0.0), y(0.0), z(0.0) {
+    }
 
     Point(const Point& orig) : x(orig.x), y(orig.y), z(orig.z) {
     }
@@ -31,14 +36,20 @@ public:
     Point operator*(const double t) const;
     bool operator==(const Point& p) const;
     Point operator=(const Point& p);
+    bool operator<(const Point &p) const;
 
     friend int colinear(const Point& a, const Point& b, const Point& c);
     double mag() const;
     double magSquared()const;
     double d(const Point& p)const;
 
-    friend std::ostream& operator<<(std::ostream& os, const Point& p);
+    Point xyProj() const;
 
+    friend std::ostream& operator<<(std::ostream& os, const Point& p);
+    
+    void stl(std::ofstream& out);
+
+    void writeToVector(std::vector<double>& vec) const;
 private:
     bool inBetween(const Point& a, const Point& b) const;
 };

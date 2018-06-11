@@ -5,6 +5,7 @@
 
 #include <cmath>
 #include "Point.h"
+using namespace std;
 
 /**
  * Outputs the x, y, z values of a point
@@ -13,7 +14,9 @@
  * @return the stream
  */
 std::ostream& operator<<(std::ostream& s, const Point& p) {
-    return s << p.x << ", " << p.y << " , " << p.z;
+    return s << (std::abs(p.x) < Point::EPSILON ? 0 : p.x) << ", " <<
+            (std::abs(p.y) < Point::EPSILON ? 0 : p.y)
+            << " , " << (std::abs(p.z) < Point::EPSILON ? 0 : p.z);
 }
 
 /**
@@ -90,8 +93,8 @@ double Point::distSquared(const Point& p) const {
  * @param p
  * @return true of they're the same.  Otherwise, false.
  */
-bool Point::operator==(const Point& p) const{
-    return distSquared(p) < Point::EPSILON;
+bool Point::operator==(const Point& p) const {
+    return distSquared(p) <= Point::EPSILON;
 }
 
 /**
@@ -100,10 +103,11 @@ bool Point::operator==(const Point& p) const{
  * @return *this
  */
 Point Point::operator=(const Point& p) {
-    x = p.x; y = p.y; z = p.z;
+    x = p.x;
+    y = p.y;
+    z = p.z;
     return *this;
 }
-
 
 /**
  * Are these three points on the same line.
@@ -132,7 +136,7 @@ double Point::magSquared() const {
  * the magnitude
  * @return the magnitude
  */
-double Point::mag() const{
+double Point::mag() const {
     return sqrtf(magSquared());
 }
 
@@ -141,7 +145,7 @@ double Point::mag() const{
  * @param p the second point
  * @return the distance from this point to p
  */
-double Point::d(const Point& p) const{
+double Point::d(const Point& p) const {
     return ((*this) - p).mag();
 }
 
@@ -152,8 +156,42 @@ double Point::d(const Point& p) const{
  * @param b
  * @return true if this point is in between a and b, otherwise false.
  */
-bool Point::inBetween(const Point& a, const Point& b) const{
+bool Point::inBetween(const Point& a, const Point& b) const {
     double ab = a.distSquared(b);
     if (distSquared(a) < ab && distSquared(b) < ab) return true;
 }
 
+/**
+ * Used for HullProj2d to sort points lexographically.
+ * @param p the point being compared to this one
+ * @return the comparison of the two points
+ */
+bool Point::operator<(const Point& p) const {
+    return x < p.x || (x == p.x && y < p.y) || (x == p.x && y == p.y && z < p.z);
+}
+
+/**
+ * the xyProj of a point
+ * @return the projection onto the xy plane
+ */
+Point Point::xyProj() const {
+    return Point(x, y, 0);
+}
+/**
+ * Writes the values of this vector to an array,
+ * @param vec the vector to write to.
+ */
+
+void Point::writeToVector(vector<double>& vec) const {
+    vec.push_back(x);
+    vec.push_back(y);
+    vec.push_back(z);
+}
+
+/**
+ * print this point to an stl file and move to the next line.
+ * @param out
+ */
+void Point::stl(std::ofstream& stlOut) {
+    stlOut << "\t\tvertex " << (float)x << " " << (float)y << " " << (float)z << endl; 
+}

@@ -1,33 +1,25 @@
-#include <cstdlib>
+/**
+ * @author Dov Neimand
+ * This file contains the main and tests the methods.
+ */
 
+#include <cstdlib>
 #include "ConvexHull.h"
 #include "SmartPoint.h"
 #include "IncrementalMethod.h"
-
+#include "HullProj2d.h"
+#include "GiftWrapping.h"
+#include <algorithm>
+#include <cmath>
+#include "Test.h"
 using namespace std;
 
+int ConvexHull::stlPrint = 0;
 
 int main(int argc, char** argv) {
-    
-    
-    vector<SmartPoint> points;
-    
-    points.push_back(SmartPoint(0,0,1));
-    points.push_back(SmartPoint(0,1,0));
-    points.push_back(SmartPoint(1,0,0));
-    points.push_back(SmartPoint(0,0,0));
-    
-    points.push_back(SmartPoint(-1,-1,-1));
-    points.push_back(SmartPoint(-65,12,98));
-    points.push_back(SmartPoint(-5,-5,-5));
-    
-    points.push_back(SmartPoint(-800,-800, 6));
-        
-    
-    IncrementalMethod ch(points);
-    
-    cout << endl << "result: " << endl << ch << endl;
-
+    Test t;
+    t.incrementalMethod2(10);
+//    t.divideAndConquerOpenMP3(50);
     return 0;
 }
 

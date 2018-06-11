@@ -9,6 +9,28 @@ using namespace std;
  * @author Dov Neimand
  */
 class ConvexHull : public vector<SmartFacet> {
+public:
+    static int stlPrint;
 
-    friend ostream& operator << (ostream& os, const ConvexHull& ch);
+    ConvexHull() {
+    };
+
+    ConvexHull(const vector<double>& vec);
+    vector<Point> hullPoints;
+
+    friend ostream& operator<<(ostream& os, ConvexHull& ch);
+    void locPoint(const Point& search, int& facetInd, int& pointInd) const;
+
+    bool testNeighbors();
+    bool isConvex(bool mute);
+    void importFacets(ConvexHull& source);
+    void stl();
+
+    void writeToVector(vector<double>& vec);
+protected:
+    int findFirstFacet(const vector<SmartPoint>& points, int start, bool add);
+    void importEntireHull(ConvexHull& source);
+    void removeDisabledFacets();
+    void setHullPoints();
+
 };

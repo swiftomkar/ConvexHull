@@ -9,9 +9,10 @@
  * Describes a facet or polygon in 3d space.  The points must be in counter 
  * clockwise order and convex.
  */
-class Facet: public std::vector<Point> {
-public: 
-
+class Facet : public std::vector<Point> {
+public:
+    Facet();
+    Facet(Point a, Point b, Point c);
     bool faces(const Point& p) const;
     bool onPlane(const Point& p) const;
     Point normal() const;
@@ -19,8 +20,11 @@ public:
     bool edgeFaces(int edge, const Point& p) const;
     void addPoint(const Point& p);
     void flip();
+    friend std::ostream& operator<<(std::ostream& os, vector<Point> f);
+    double relToFacet(const Point& p) const;
+    void stl(std::ofstream& stlOut);
+private:
     
-    friend std::ostream& operator <<(std::ostream& os, Facet f);
-
+    
 };
 

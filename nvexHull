@@ -1,0 +1,128 @@
+solid ConvexHull
+facet normal -13.5374 0.413362 0.268489
+	outer loop
+		vertex 0.0161748 1.44475 2.52724
+		vertex 0.0466933 1.19083 4.45692
+		vertex 0.237434 8.40144 2.97281
+	endloop
+endfacet
+facet normal 4.93078 -0.105465 -0.801873
+	outer loop
+		vertex 0.0161748 1.44475 2.52724
+		vertex 0.237434 8.40144 2.97281
+		vertex 0.350963 8.34681 3.67809
+	endloop
+endfacet
+facet normal 12.1732 -0.692215 -0.283607
+	outer loop
+		vertex 0.0466933 1.19083 4.45692
+		vertex 0.0161748 1.44475 2.52724
+		vertex 0.432142 7.27683 6.14704
+	endloop
+endfacet
+facet normal -21.2191 0.894424 1.61847
+	outer loop
+		vertex 0.237434 8.40144 2.97281
+		vertex 0.0466933 1.19083 4.45692
+		vertex 0.432142 7.27683 6.14704
+	endloop
+endfacet
+facet normal 3.71135 -0.0805923 -0.596307
+	outer loop
+		vertex 0.0161748 1.44475 2.52724
+		vertex 0.350963 8.34681 3.67809
+		vertex 0.484329 9.31516 4.37727
+	endloop
+endfacet
+facet normal 0.721157 -0.0146837 -0.117221
+	outer loop
+		vertex 0.350963 8.34681 3.67809
+		vertex 0.237434 8.40144 2.97281
+		vertex 0.484329 9.31516 4.37727
+	endloop
+endfacet
+facet normal -4.47984 0.510241 0.455569
+	outer loop
+		vertex 0.237434 8.40144 2.97281
+		vertex 0.432142 7.27683 6.14704
+		vertex 0.484329 9.31516 4.37727
+	endloop
+endfacet
+facet normal 17.6998 -0.925071 -0.543522
+	outer loop
+		vertex 0.432142 7.27683 6.14704
+		vertex 0.0161748 1.44475 2.52724
+		vertex 0.484329 9.31516 4.37727
+	endloop
+endfacet
+facet normal -2.6091 0.16528 0.308688
+	outer loop
+		vertex 0.803858 4.94461 3.51299
+		vertex 0.703757 4.26557 3.03049
+		vertex 1.2302 4.75295 7.21915
+	endloop
+endfacet
+facet normal 9.32107 -2.0881 -0.928535
+	outer loop
+		vertex 0.703757 4.26557 3.03049
+		vertex 0.943937 6.25172 0.975066
+		vertex 1.2302 4.75295 7.21915
+	endloop
+endfacet
+facet normal 15.0528 -1.51926 -1.05477
+	outer loop
+		vertex 1.2302 4.75295 7.21915
+		vertex 0.943937 6.25172 0.975066
+		vertex 1.23325 8.42158 1.97851
+	endloop
+endfacet
+facet normal -2.51695 0.277323 0.131889
+	outer loop
+		vertex 0.703757 4.26557 3.03049
+		vertex 0.803858 4.94461 3.51299
+		vertex 1.27232 9.43999 3.00058
+	endloop
+endfacet
+facet normal -16.5624 1.95465 2.00636
+	outer loop
+		vertex 0.803858 4.94461 3.51299
+		vertex 1.2302 4.75295 7.21915
+		vertex 1.27232 9.43999 3.00058
+	endloop
+endfacet
+facet normal 9.08666 -0.207838 -0.140202
+	outer loop
+		vertex 1.2302 4.75295 7.21915
+		vertex 1.23325 8.42158 1.97851
+		vertex 1.27232 9.43999 3.00058
+	endloop
+endfacet
+facet normal -1.19583 0.256501 -0.209877
+	outer loop
+		vertex 1.23325 8.42158 1.97851
+		vertex 0.943937 6.25172 0.975066
+		vertex 1.27232 9.43999 3.00058
+	endloop
+endfacet
+facet normal -10.5762 1.16145 -0.113552
+	outer loop
+		vertex 0.943937 6.25172 0.975066
+		vertex 0.703757 4.26557 3.03049
+		vertex 1.27232 9.43999 3.00058
+	endloop
+endfacet
+facet normal 5.92603 3.2662 3.68807
+	outer loop
+		vertex 1.2302 4.75295 7.21915
+		vertex 1.27232 9.43999 3.00058
+		vertex 0.484329 9.31516 4.37727
+	endloop
+endfacet
+facet normal 2.28136 1.46833 1.75842
+	outer loop
+		vertex 0.484329 9.31516 4.37727
+		vertex 0.432142 7.27683 6.14704
+		vertex 1.2302 4.75295 7.21915
+	endloop
+endfacet
+endsolid ConvexHull

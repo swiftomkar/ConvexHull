@@ -1,13 +1,13 @@
 /**
  * @author Dov Neimand
  */
-#include "Edge.h"
+#include "SmartEdge.h"
 
 /**
  * moves the edge one vertex its inside facet.  The direction moved is counter 
  * clockwise be default and can be toggled with change direction.
  */
-void Edge::progress() {
+void SmartEdge::progress() {
     index = (index + indexDir) % inside->size();
     if (index < 0) index = inside->size() + index;
 }
@@ -15,7 +15,7 @@ void Edge::progress() {
 /**
  * Flips the inside and outside polygon of the edge.
  */
-void Edge::flip() {
+void SmartEdge::flip() {
     int tempInd = outsideIndex();
     inside = outside();
     index = tempInd;
@@ -23,10 +23,32 @@ void Edge::flip() {
 
 /**
  * Changes the direction the edge will move along its inside polygon.
+ * This should be thought of as going backwards, not turning around.  b() will
+ * now be in the back and a() in the front.
  * counter clockwise to clockwise or vice versa.
  */
-void Edge::changeDir() {
+void SmartEdge::changeDir() {
     indexDir = -indexDir;
+}
+
+/**
+ * backs the edge up.
+ */
+void SmartEdge::backUp() {
+    index--;
+    if(index < 0) index = inside->size() - 1;
+}
+
+/**
+ * equals
+ * @param e
+ * @return e 
+ */
+SmartEdge& SmartEdge::operator=(const SmartEdge& e) {
+    inside = e.inside;
+    index = e.index;
+    indexDir = e.indexDir;
+    return *this;
 }
 
 /**
@@ -34,7 +56,7 @@ void Edge::changeDir() {
  * @param e the edge to be compared
  * @return Are they equal?
  */
-bool Edge::operator==(const Edge& e) const {
+bool SmartEdge::operator==(const SmartEdge& e) const {
     return (a() == e.a() && b() == e.b()) || (a() == e.b() && b() == e.a());
 }
 
@@ -42,7 +64,7 @@ bool Edge::operator==(const Edge& e) const {
  * the vert vertex of the edge counter clockwise on the inside facet.
  * @return 
  */
-Point Edge::a() const {
+Point SmartEdge::a() const {
     return (*inside)[index];
 }
 
@@ -50,7 +72,7 @@ Point Edge::a() const {
  * the second vertex of the edge counter clockwise on the inside facet.
  * @return 
  */
-Point Edge::b() const {
+Point SmartEdge::b() const {
     return (*inside)[(index + 1) % (inside->size())];
 }
 
@@ -61,11 +83,13 @@ Point Edge::b() const {
  * with this edge.
  * @return The index of b() on the outside matrix.
  */
- int Edge::outsideIndex() const {
+int SmartEdge::outsideIndex(){
+//    return outside()->neighborIndex(inside);
     
-    for (int i = 0; i < outside()->size(); i++) if ((*outside())[i] == b()) return i;
-    cerr << "index not found" << endl;
-    throw "index not found";
+    for(int i = 0; i < outside()->size(); i++)
+        if((*outside())[i] == b()) return i;
+    cerr << "SmartEdge::outsideIndex() - index not found" << endl;
+    return -1;
 }
 
 /**
@@ -73,7 +97,7 @@ Point Edge::b() const {
  * facet and an outside facet.
  * @return the facet outside this edge
  */
-SmartFacet* Edge::outside() const{
+SmartFacet* SmartEdge::outside() const {
     return inside->getNeighbor(index);
 }
 
@@ -83,6 +107,22 @@ SmartFacet* Edge::outside() const{
  * @param e the edge to be outputed
  * @return the ostream
  */
-std::ostream& operator<<(std::ostream& os, const Edge& e) {
+std::ostream& operator<<(std::ostream& os, const SmartEdge& e) {
     return os << "(" << e.a() << "), (" << e.b() << ")";
+}
+
+/**
+ * gets the index
+ * @return the index of the inside facet that is this edge
+ */
+int SmartEdge::getIndex() const {
+    return index;
+}
+
+/**
+ * sets the index for this facet on the inside edge
+ * @param i the index
+ */
+void SmartEdge::setIndex(int i) {
+    index = i;
 }

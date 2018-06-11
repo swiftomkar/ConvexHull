@@ -2,6 +2,29 @@
  * @author Dov Neimand
  */
 #include "Facet.h"
+#include <assert.h>
+#define self (*this)
+
+/**
+ * empty constructor.  The facet still needs to be loaded.
+ */
+Facet::Facet() {
+
+}
+
+/**
+ * Constructor. Facet created with three points.  The points must be in counter
+ *  clockwise order and coplanar.
+ * @param a
+ * @param b
+ * @param c
+ */
+Facet::Facet(Point a, Point b, Point c) {
+    reserve(3);
+    push_back(a);
+    push_back(b);
+    push_back(c);
+}
 
 /**
  * A normal vector
@@ -9,7 +32,17 @@
  * vector.
  */
 Point Facet::normal() const {
-    return ((*this)[0]-(*this)[1]).cross((*this)[2] - (*this)[1]);
+    return (self[2] - self[1]).cross(self[0] - self[1]);
+}
+
+/**
+ * where the point is relative to the facet
+ * @param p
+ * @return positive if the facet faces the point, 0 if the point is on the facet
+ * and negative otherwise.
+ */
+double Facet::relToFacet(const Point& p) const {
+    return (p - self[0]).dot(normal());
 }
 
 /**
@@ -18,7 +51,7 @@ Point Facet::normal() const {
  * @return true if the facet faces the point, else false.
  */
 bool Facet::faces(const Point& p) const {
-    return (p - (*this)[0]).dot(normal()) > Point::EPSILON;
+    return relToFacet(p) > Point::EPSILON;
 }
 
 /**
@@ -27,7 +60,8 @@ bool Facet::faces(const Point& p) const {
  * @return true if it's on the plane, false if not.
  */
 bool Facet::onPlane(const Point& p) const {
-    return abs((p - (*this)[0]).dot(normal())) < Point::EPSILON;
+    double op = relToFacet(p);
+    return (op < 0 ? -op : op) < Point::EPSILON;
 }
 
 /**
@@ -36,12 +70,12 @@ bool Facet::onPlane(const Point& p) const {
  * @return a plane perpendicular to this one along edge i.
  */
 Facet Facet::sidePlane(int i) const {
-    Point top = ((*this)[(i + 2) % size()]-(*this)[(i + 1) % size()]).cross((*this)[i]-(*this)[(i + 1) % size()]);
+    Point top = self[i] + normal();
     Facet side;
-    side.push_back((*this)[i]);
+    side.push_back(self[i]);
+    assert(size() != 0);
+    side.push_back(self[(i + 1) % size()]);
     side.push_back(top);
-    side.push_back((*this)[(i + 1) % size()]);
-
     return side;
 }
 
@@ -52,7 +86,7 @@ Facet Facet::sidePlane(int i) const {
  * @return true if the side plane faces the point, otherwise false
  */
 bool Facet::edgeFaces(int edge, const Point& p) const {
-    return sidePlane(edge).faces(p);
+    return sidePlane(edge % size()).faces(p);
 }
 
 /**
@@ -60,22 +94,24 @@ bool Facet::edgeFaces(int edge, const Point& p) const {
  * @param p the point to be added.
  */
 void Facet::addPoint(const Point& p) {
+
     for (int i = 0; i < size(); i++) {
         if (edgeFaces(i, p)) {
-            while (edgeFaces(i + 1, p)) erase(begin() + i + 1);
-            insert(begin() + i + 1, p);
+            while (edgeFaces(i + 1, p)) erase(begin() + (i + 1) % size());
+            insert(begin() + (i + 1) % size(), p);
+            break;
         }
-        
+
     }
 }
 
 /**
  * outputs this facet on the given stream
  * @param os the stream to output the facet
- * @param f the facet to be outputed
+ * @param f the facet to be output
  * @return the stream
  */
-std::ostream& operator<<(std::ostream& os, Facet f) {
+std::ostream& operator<<(std::ostream& os, std::vector<Point> f) {
     for (auto p : f) {
         os << "(" << p << "), ";
     }
@@ -87,8 +123,19 @@ std::ostream& operator<<(std::ostream& os, Facet f) {
  */
 void Facet::flip() {
     int left = 0, right = size() - 1;
-    while(left < right) {
-        std::swap((*this)[left++], (*this)[right--]);
+    while (left < right) {
+        std::swap(self[left++], self[right--]);
     }
 }
 
+/**
+ * outputs this facet to an stl
+ * @param stlOut
+ */
+void Facet::stl(std::ofstream& stlOut) {
+    stlOut << "facet normal " << normal().x << " " << normal().y << " " << normal().z << std::endl;
+    stlOut << "\touter loop" << std::endl;
+    for (int i = 0; i < size(); i++) self[i].stl(stlOut);
+    stlOut << "\tendloop" << std::endl;
+    stlOut << "endfacet" << std::endl;
+}

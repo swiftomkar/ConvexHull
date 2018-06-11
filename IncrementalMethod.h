@@ -1,5 +1,6 @@
-#pragma once;
-#include "Edge.h"
+#include <unordered_set>
+
+#include "SmartEdge.h"
 #include "ConvexHull.h"
 
 /**
@@ -15,11 +16,10 @@ public:
     
 private:
     void pyramid(const SmartPoint& p);
-    void cone(const SmartPoint& p, vector<Edge>& edges);
-    int firstFacet(const vector<SmartPoint>& points);    
-    void setHorizon(vector<Edge>& horizon, const SmartPoint& star);
-    void updateConflifctGraph(const vector<Edge>& horizon, SmartPoint& star);
-    void removeDisabledFacets();
+    void cone(const SmartPoint& p, vector<SmartEdge>& edges);
+    void setHorizon(vector<SmartEdge>& horizon, const SmartPoint& star);
+    void updateConflifctGraph(const vector<SmartEdge>& horizon, SmartPoint& star);
+    unordered_set<SmartPoint*> potentialHullPoints;
 
     
 };
