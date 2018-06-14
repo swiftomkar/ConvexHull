@@ -11,17 +11,37 @@
 #include "GiftWrapping.h"
 #include "DivideAndConquerOpenMP.h"
 #include <algorithm>
+#include <omp.h>
 
 /**
  * The constructor
  * @param points
  */
-DivideAndConquerOpenMP::DivideAndConquerOpenMP(vector<SmartPoint>& points) 
-: DivideAndConquerOpenMP(points, false) {
+DivideAndConquerOpenMP::DivideAndConquerOpenMP(vector<SmartPoint>& points) {
+    build(points, false);
 
 }
 
-DivideAndConquerOpenMP::DivideAndConquerOpenMP(vector<SmartPoint>& points, bool alreadySorted) {
+/**
+ * The constructor
+ * @param vec a vector of doubles where each point is made from three
+ * consecutive doubles.
+ */
+DivideAndConquerOpenMP::DivideAndConquerOpenMP(const vector<double>& vec) {
+    vector<SmartPoint> points;
+    points.reserve(vec.size()/3);
+    for(int i = 0; i < points.size() && vec[i] == vec[i]; i+=3)
+        points.push_back(SmartPoint(vec, i));
+    build(points, false);
+}
+
+/**
+ * Builds the convex hull. This is kept separate from the constructors to 
+ * assist with multi threading scope issues.
+ * @param points the points the hull is to be built from.
+ * @param alreadySorted true if the points are already sorted, false otherwise.
+ */
+void DivideAndConquerOpenMP::build(vector<SmartPoint>& points, bool alreadySorted) {
     if (!alreadySorted) sort(points.begin(), points.end());
     reserve(2 * points.size() * points.size());
 
@@ -32,56 +52,23 @@ DivideAndConquerOpenMP::DivideAndConquerOpenMP(vector<SmartPoint>& points, bool 
         return;
     }
 
-    /////////////////done in parallel//////////
-    vector<SmartPoint> leftPoints(points.begin(), points.begin() + points.size() / 2);
-    vector<SmartPoint> rightPoints(points.begin() + points.size() / 2, points.end());
+    DivideAndConquerOpenMP left, right;
+    omp_set_num_threads(2);
+#pragma omp parallel
+    {
+        bool fewThreads = omp_get_num_threads() < 2;
 
-    if (numSubHulls == 2) {
-        IncrementalMethod leftHull(leftPoints);
-        IncrementalMethod rightHull(rightPoints);
-        
-        leftHull.stl();
-        rightHull.stl();
-        //////////////////end parrallel//////////////
-        GiftWrapping gw(leftHull, rightHull);
-        importEntireHull(gw);
-        return;
+        if (omp_get_thread_num() == 0 || fewThreads) {
+            vector<SmartPoint> leftPoints(points.begin(), points.begin() + points.size() / 2);
+            left.build(leftPoints, true);
+        }
+        if (omp_get_thread_num() == 1 || fewThreads) {
+            vector<SmartPoint> rightPoints(points.begin() + points.size() / 2, points.end());
+            right.build(rightPoints, true);
+        }
+
     }
-
-    DivideAndConquerOpenMP leftHull(leftPoints, true);
-    DivideAndConquerOpenMP rightHull(rightPoints, true);
-    //////////////////end parralell//////////////
-    GiftWrapping gw(leftHull, rightHull);
+    GiftWrapping gw(left, right);
     importEntireHull(gw);
-    return;
 }
 
-/**
- * Does this set of points allow for 0, 1 or two sub hulls?  That is, if we
- * split the set of points in half, does each half have enough points to make
- * a 3d convex hull.
- * @param points the points the sub hulls are to be taken from.
- * @return 0, 1, 2, or 4 depending on weather or not hulls can be made when the
- * set is cut in half.
- */
-int DivideAndConquerOpenMP::maxNumSubHulls(const vector<SmartPoint>& points) {
-    int firstFacetSize = findFirstFacet(points, 0, false) + 1;
-    if (firstFacetSize >= points.size()) {
-        cerr << "DivideAndConquer::DivideAndConquer " <<
-                "points can't make polyhedron.";
-        throw "DivideAndConquer::DivideAndConquer points can't make polyhedron.";
-    }
-    int secondHalfFacetSize = findFirstFacet(points, points.size() / 2, false) + 1;
-    if (secondHalfFacetSize >= points.size() || firstFacetSize >= points.size() / 2) {
-        return 1;
-    }
-    if (firstFacetSize > points.size() / 4 && secondHalfFacetSize > 3 * points.size() / 4) {
-        return 2;
-    }
-
-    if (firstFacetSize < points.size() / 4 && secondHalfFacetSize < points.size() * 3.0 / 4
-            && findFirstFacet(points, points.size() / 4, false) + 1 < points.size() / 2
-            && findFirstFacet(points, 3 * points.size() / 4, false) + 1 < points.size())
-        return 4;
-    return 2;
-}

@@ -20,9 +20,11 @@ using namespace std;
  */
 class HullProj2d: public Facet{
 public:
+    HullProj2d(){}
     HullProj2d(ConvexHull& ch);
-    int minX();
-    int maxX();
+    void build(ConvexHull& ch);
+    int minX() const;
+    int maxX() const;
     Facet sidePlane(int i) const;
     bool edgeFaces(int edge, const Point& p) const;
 private:

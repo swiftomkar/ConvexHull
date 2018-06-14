@@ -18,8 +18,12 @@ int ConvexHull::stlPrint = 0;
 
 int main(int argc, char** argv) {
     Test t;
-    t.incrementalMethod2(10);
-//    t.divideAndConquerOpenMP3(50);
+    
+    t.giftWrapping4();
+    
+//        for(int i = 0; i < 50; i++)
+//                t.divideAndConquerOpenMP3(100, i, false);
+//        t.testEverything();
     return 0;
 }
 

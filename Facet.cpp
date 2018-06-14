@@ -119,7 +119,8 @@ std::ostream& operator<<(std::ostream& os, std::vector<Point> f) {
 }
 
 /**
- * inverts the order of the vertices
+ * inverts the order of the vertices.  The new normal will face the oppasite
+ * direction of the old one.
  */
 void Facet::flip() {
     int left = 0, right = size() - 1;
@@ -133,9 +134,15 @@ void Facet::flip() {
  * @param stlOut
  */
 void Facet::stl(std::ofstream& stlOut) {
-    stlOut << "facet normal " << normal().x << " " << normal().y << " " << normal().z << std::endl;
-    stlOut << "\touter loop" << std::endl;
-    for (int i = 0; i < size(); i++) self[i].stl(stlOut);
-    stlOut << "\tendloop" << std::endl;
-    stlOut << "endfacet" << std::endl;
+    for (int i = 0; i < size() - 2; i++) {
+        stlOut << "facet normal " << normal().x << " " << normal().y << " " << normal().z << std::endl;
+        stlOut << "\touter loop" << std::endl;
+        
+        self[0].stl(stlOut);
+        self[i+1].stl(stlOut);
+        self[i+2].stl(stlOut);
+        
+        stlOut << "\tendloop" << std::endl;
+        stlOut << "endfacet" << std::endl;
+    }
 }

@@ -17,10 +17,12 @@ using namespace std;
  * each of them with a separate thread and incremental method, then merge them
  * with gift wrapping. 
  */
-class DivideAndConquerOpenMP: public ConvexHull{
+class DivideAndConquerOpenMP : public ConvexHull {
 public:
+
+    DivideAndConquerOpenMP(){}
     DivideAndConquerOpenMP(vector<SmartPoint>& points);
-    DivideAndConquerOpenMP(vector<SmartPoint>& points, bool alreadySorted);
+    DivideAndConquerOpenMP(const vector<double>& points);
+    void build(vector<SmartPoint>& points, bool alreadySorted);
 private:
-    int maxNumSubHulls(const vector<SmartPoint>& points);
 };

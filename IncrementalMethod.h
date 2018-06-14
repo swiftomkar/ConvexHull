@@ -17,10 +17,10 @@ public:
 private:
     void pyramid(const SmartPoint& p);
     void cone(const SmartPoint& p, vector<SmartEdge>& edges);
-    void setHorizon(vector<SmartEdge>& horizon, const SmartPoint& star);
-    void updateConflifctGraph(const vector<SmartEdge>& horizon, SmartPoint& star);
+    void setHorizon(vector<SmartEdge>& horizon,  SmartPoint& star);
+    void updateConflifctGraph(vector<SmartEdge>& horizon, SmartPoint& star);
     unordered_set<SmartPoint*> potentialHullPoints;
-
-    
+    void findHorizon(SmartEdge& edge, const Point& star);
+    void initConflictGraph(vector<SmartPoint>& points, int pointIndex);
 };
 

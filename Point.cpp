@@ -171,6 +171,15 @@ bool Point::operator<(const Point& p) const {
 }
 
 /**
+ * oppasite of <
+ * @param p
+ * @return 
+ */
+bool Point::operator>(const Point& p) const {
+    return !((*this) < p) && !((*this) == p);
+}
+
+/**
  * the xyProj of a point
  * @return the projection onto the xy plane
  */

@@ -37,6 +37,7 @@ public:
     bool operator==(const Point& p) const;
     Point operator=(const Point& p);
     bool operator<(const Point &p) const;
+    bool operator>(const Point &p) const;
 
     friend int colinear(const Point& a, const Point& b, const Point& c);
     double mag() const;

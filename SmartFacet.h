@@ -15,6 +15,7 @@ class SmartPoint;
 class SmartFacet: public Facet {
 public:    
     
+    SmartFacet(){}
     SmartFacet(int expectedSize);
     SmartFacet(const Point& a, const Point& b, const Point& c);
     
@@ -25,24 +26,29 @@ public:
     void disable();
     bool enabled() const;
     
-    std::vector<SmartPoint*> sky;
     
     SmartFacet* getNeighbor(int i);
+    
     void changeOfAddress(int shift);
     void changeOfAddress(SmartFacet* changeTo);
 
-    int neighborIndex(const SmartFacet* f);
-    bool testNeighbors();
-    int pointIndex(Point p);
+    void copy(const SmartFacet& source);
     
-    void appendToVector(std::vector<double>& vec);
+    int neighborIndex(const SmartFacet* f) const;
+    bool testNeighbors() const;
+    int pointIndex(const Point& p) const;
+    
+    void appendToVector(std::vector<double>& vec) const;
     SmartFacet(const std::vector<double>& vec, int& vecIndex, SmartFacet* address);
     
     bool counterCl() const;
     
-    int emptyNeighbor() const;
+    SmartPoint* star(int i);
+    int numStars() const;
+    
 private:
-    friend SmartPoint;    
     bool isEnabled = true;
     std::vector<SmartFacet*> neighbors;
+    std::vector<SmartPoint*> sky;
+    
 };

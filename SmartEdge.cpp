@@ -17,7 +17,7 @@ void SmartEdge::progress() {
  */
 void SmartEdge::flip() {
     int tempInd = outsideIndex();
-    inside = outside();
+    inside = getOutside();
     index = tempInd;
 }
 
@@ -57,7 +57,8 @@ SmartEdge& SmartEdge::operator=(const SmartEdge& e) {
  * @return Are they equal?
  */
 bool SmartEdge::operator==(const SmartEdge& e) const {
-    return (a() == e.a() && b() == e.b()) || (a() == e.b() && b() == e.a());
+    return (a() == e.a() && b() == e.b()) || 
+           (a() == e.b() && b() == e.a());
 }
 
 /**
@@ -86,8 +87,8 @@ Point SmartEdge::b() const {
 int SmartEdge::outsideIndex(){
 //    return outside()->neighborIndex(inside);
     
-    for(int i = 0; i < outside()->size(); i++)
-        if((*outside())[i] == b()) return i;
+    for(int i = 0; i < getOutside()->size(); i++)
+        if((*getOutside())[i] == b()) return i;
     cerr << "SmartEdge::outsideIndex() - index not found" << endl;
     return -1;
 }
@@ -97,7 +98,7 @@ int SmartEdge::outsideIndex(){
  * facet and an outside facet.
  * @return the facet outside this edge
  */
-SmartFacet* SmartEdge::outside() const {
+SmartFacet* SmartEdge::getOutside() const {
     return inside->getNeighbor(index);
 }
 
@@ -125,4 +126,47 @@ int SmartEdge::getIndex() const {
  */
 void SmartEdge::setIndex(int i) {
     index = i;
+}
+
+/**
+ * the direction of the index
+ * @return the direction of the index
+ */
+int SmartEdge::getIndexDir() const {
+    return indexDir;
+}
+
+/**
+ * The facet to the left of the edge, and the facet to which the edge is 
+ * attached.
+ * @return the facet to the right of the edge
+ */
+SmartFacet* SmartEdge::getInside() {
+    return inside;
+}
+
+/**
+ * The facet that is intended to replace the current inside of the edge.
+ * @return The facet that is intended to replace the current inside of the edge.
+ */
+SmartFacet* SmartEdge::getReplacementInside() {
+    return replacementInside;
+}
+
+/**
+ * Sets the inside, or left, edge of the edge.  This is the facet to which the
+ * edge is attached.
+ * @param f the new inside / left facet.
+ */
+void SmartEdge::setInside(SmartFacet* f) {
+    inside = f;
+}
+
+/**
+ * Sets the inside that will replace this one.  This method does not insure
+ * replacement, but just stores the replacing facet for convenient access.
+ * @param f the facet
+ */
+void SmartEdge::setReplacementInside(SmartFacet* f) {
+    replacementInside = f;
 }

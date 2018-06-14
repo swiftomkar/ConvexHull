@@ -11,9 +11,6 @@
 class SmartEdge {
 public:
     
-    SmartFacet* inside;
-    SmartFacet* replacementInside;
-    SmartFacet* oldOutside;
     
     SmartEdge(int i, SmartFacet* inside):index(i), inside(inside){}
     SmartEdge(const SmartEdge& orig):index(orig.index), inside(orig.inside){}
@@ -35,12 +32,20 @@ public:
     Point b() const;
     
     
-    SmartFacet* outside() const;
+    SmartFacet* getOutside() const;
     
     friend std::ostream& operator <<(std::ostream& os, const SmartEdge& e);
+    int getIndexDir() const;
+    
+    SmartFacet* getInside();
+    void setInside(SmartFacet* f);
+    SmartFacet* getReplacementInside();
+    void setReplacementInside(SmartFacet* f);
     
 private:
     int index;
     int indexDir = 1;
-
+    
+    SmartFacet* inside;
+    SmartFacet* replacementInside;
 };

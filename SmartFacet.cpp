@@ -12,7 +12,7 @@
  */
 void SmartFacet::bondPoint(SmartPoint& p) {
     sky.push_back(&p);
-    p.facingFacets.push_back(this);
+    p.bondFacet(this);
 }
 
 /**
@@ -31,31 +31,18 @@ void SmartFacet::initPoints(std::vector<SmartPoint>& points, int start) {
  * @param f the neighbor being added
  */
 void SmartFacet::setNeighbor(int side, SmartFacet* f) {
-    while (side >= neighbors.size())
+    while (neighbors.size() < size() )
         neighbors.push_back(nullptr);
     neighbors[side] = f;
 }
 
 /**
- * marks this facet as disabled and breaks the link with all the starts facing 
+ * marks this facet as disabled and breaks the link with all the stars facing 
  * this.
  */
 void SmartFacet::disable() {
     isEnabled = false;
-    for (int i = 0; i < sky.size(); i++) {
-        int shift = 0;
-
-        for (int j = 0; j + shift < sky[i]->facingFacets.size(); j++) {
-            if (sky[i]->facingFacets[j + shift] == this) {
-                shift++;
-                j--;
-                continue;
-            }
-            sky[i]->facingFacets[j] = sky[i]->facingFacets[j + shift];
-        }
-        for (int j = 0; j < shift; j++)
-            sky[i]->facingFacets.pop_back();
-    }
+    for (int i = 0; i < sky.size(); i++) sky[i]->removeFacingFacet(this);
 }
 
 /**
@@ -96,6 +83,7 @@ SmartFacet::SmartFacet(const Point& a, const Point& b, const Point& c) : SmartFa
 }
 
 /**
+ * These need to be removed and replaced with the copy function.
  * Moves all the pointers of the neighbors to their new addresses.  
  * TODO: Their might be a bug here if different neighbors get shifted different
  * amounts.  Seems to work for now.
@@ -118,11 +106,27 @@ void SmartFacet::changeOfAddress(SmartFacet* toAddress) {
 }
 
 /**
+ * Copies all the values of a smart facet into this one, which is first emptied.
+ * The neighbors addresses are adjusted to the positions they are expected to
+ * be copied to. 
+ * @param orig the facet copied.
+ */
+void SmartFacet::copy(const SmartFacet& orig) {
+    clear();
+    reserve(orig.size());
+    for (int i = 0; i < orig.size(); i++) {
+        push_back(orig[i]);
+        neighbors.push_back(this +(orig.neighbors[i] - &orig));
+    }
+}
+
+
+/**
  * Is f a neighbor?
  * @param f the neighbor to search for.
  * @return -1 if f is not neighbor, otherwise the index of the neighbor.
  */
-int SmartFacet::neighborIndex(const SmartFacet* f) {
+int SmartFacet::neighborIndex(const SmartFacet* f) const{
 
     for (int i = 0; i < size(); i++) if (neighbors[i] == f) return i;
     return -1;
@@ -133,7 +137,7 @@ int SmartFacet::neighborIndex(const SmartFacet* f) {
  * Are the neighbors set up properly.
  * @return true if they are and false if they are not.
  */
-bool SmartFacet::testNeighbors() {
+bool SmartFacet::testNeighbors() const{
 
     if (!enabled()) {
         cerr << "bad facet tested" << endl;
@@ -143,21 +147,37 @@ bool SmartFacet::testNeighbors() {
         cerr << "neighbors size != size" << endl;
         return false;
     }
-    for(int i = 0; i < size(); i++)
-        for(int j = i+1; j < size(); j++)
-            if(neighbors[i] == neighbors[j]){
+    for (int i = 0; i < size(); i++)
+        for (int j = i + 1; j < size(); j++)
+            if (neighbors[i] == neighbors[j]) {
                 cout << (*this) << " has the same neighbor " << *neighbors[i] << "at both indeces " << *neighbors[j] << endl;
                 return false;
             }
-            
+
     for (int i = 0; i < size(); i++) {
+        
+        if(!neighbors[i]->enabled()){
+            cout << *this << "has a disabled neighbor " << *neighbors[i] << endl;
+            return false;
+        }
+        
         int neighborInd = neighbors[i]->neighborIndex(this);
         if (neighborInd == -1) {
             cout << *this << " is not properly connected with " << *neighbors[i] << " at index " << i << endl;
             return false;
         }
-        return true;
+        if(!((*neighbors[i])[neighborInd] == (*this)[(i + 1)%size()]) ||
+           !((*neighbors[i])[(neighborInd + 1)%neighbors[i]->size()]
+            == (*this)[i])){
+            cout << "neighbors points don't match up" << endl;
+            cout << "neighbor index = " << neighborInd << endl;
+            cout << "this = " << (*this) << endl;
+            cout << "neighbor["<<i<<"] = " << *neighbors[i];
+            return false;
+        }
+
     }
+    return true;
 }
 
 /**
@@ -165,7 +185,7 @@ bool SmartFacet::testNeighbors() {
  * @param p
  * @return 
  */
-int SmartFacet::pointIndex(Point p) {
+int SmartFacet::pointIndex(const Point& p) const{
     for (int i = 0; i < size(); i++) if ((*this)[i] == p) return i;
     return -1;
 }
@@ -178,8 +198,8 @@ int SmartFacet::pointIndex(Point p) {
  * 
  * @param vec the vector appended to.
  */
-void SmartFacet::appendToVector(std::vector<double>& vec) {
-    for (int i = 0; i < size(); i++){
+void SmartFacet::appendToVector(std::vector<double>& vec) const{
+    for (int i = 0; i < size(); i++) {
         (*this)[i].writeToVector(vec);
         vec.push_back(neighbors[i] - this);
     }
@@ -199,27 +219,11 @@ SmartFacet::SmartFacet(const std::vector<double>& vec, int& vecIndex, SmartFacet
     while (vec[vecIndex] == vec[vecIndex]) {//is not NAN
         push_back(SmartPoint(vec, vecIndex));
         vecIndex += 3;
-        neighbors.push_back(address + (int)vec[vecIndex]);
+        neighbors.push_back(address + (int) vec[vecIndex]);
         vecIndex++;
     }
 }
 
-/**
- * finds the first neighbor index that is empty.  
- * @return the first neighbor index that's empty.  If none exists, returns -1;
- */
-int SmartFacet::emptyNeighbor() const {
-    cout << "empty neighbor seaerch " << endl;
-    for(int i = 0; i < neighbors.size(); i++){
-        cout << "at " << i << " lives " << *neighbors[i] << endl;
-        if(neighbors[i] == nullptr) return i;
-    }
-    if (neighbors.size() < size()) {
-        cout << "missing neighbors, returning" << neighbors.size() << endl;
-        return neighbors.size();
-    }
-    return -1;
-}
 
 /**
  * Is the x value of the third point greater than that of the first two.
@@ -228,6 +232,23 @@ int SmartFacet::emptyNeighbor() const {
  * @return true if the facet is based off a left CH and false if right.
  */
 bool SmartFacet::counterCl() const {
-    if((*this)[2].x >= (*this)[0].x && (*this)[2].x >= (*this)[1].x) return true;
+    if ((*this)[2].x >= (*this)[0].x && (*this)[2].x >= (*this)[1].x) return true;
     return false;
+}
+
+/**
+ * the number of points this facet faces.
+ * @return the number of points this facet faces.
+ */
+int SmartFacet::numStars() const {
+    return sky.size();
+}
+
+/**
+ * A point faced by this facet
+ * @param i the index of the point faced
+ * @return a point faced by this facet
+ */
+SmartPoint* SmartFacet::star(int i) {
+    return sky[i];
 }

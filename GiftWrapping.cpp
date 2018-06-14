@@ -10,6 +10,8 @@
 #include "HullProj2d.h"
 #include "SmartEdge.h"
 #include <assert.h>
+#include <unordered_set>
+#include <omp.h>
 #define self (*this)
 
 /**
@@ -20,7 +22,17 @@
  * of the left convex hull.
  */
 GiftWrapping::GiftWrapping(ConvexHull& chLeft, ConvexHull& chRight) {
+    build(chLeft, chRight);
+}
 
+/**
+ * Gift wraps this empty CH.
+ * @param chLeft A convex hull with all of its elements entirely to the left of
+ * all the elements in the right convex hull.
+ * @param chRight a convex hull with all of its elements entirely to the right 
+ * of the left convex hull.
+ */
+void GiftWrapping::build(ConvexHull& chLeft, ConvexHull& chRight) {
     assert(!chLeft.empty());
     assert(!chRight.empty());
     assert(chLeft.testNeighbors() && chRight.testNeighbors());
@@ -30,16 +42,23 @@ GiftWrapping::GiftWrapping(ConvexHull& chLeft, ConvexHull& chRight) {
     reserve(10 + chLeft.size()*3 + chRight.size()*3);
 
     buildBridge(chLeft, chRight);
-    bondFlatNeighbors();
 
-    gut(*leftInside);
-    gut(*rightInside);
+    assert(isConvex(false));
+    setNeighbors();
+
+    omp_set_num_threads(2);
+#pragma omp parallel
+    {
+        bool fewThreads = omp_get_num_threads() < 2;
+        if (omp_get_thread_num() == 0 || fewThreads) gut(*leftInside);
+        if (omp_get_thread_num() == 1 || fewThreads) gut(*rightInside);
+    }
 
     importFacets(chLeft);
     importFacets(chRight);
-
     setHullPoints();
     assert(isConvex(false));
+
 }
 
 /**
@@ -69,24 +88,58 @@ void GiftWrapping::initEdges(SmartEdge& left, SmartEdge& right,
         ConvexHull& chLeft, ConvexHull& chRight) {
     int leftSupEdge, rightSupEdge;
 
-    HullProj2d hpLeft(chLeft);
-    HullProj2d hpRight(chRight);
+    HullProj2d hpLeft, hpRight;
+    buildHullProjections(hpLeft, hpRight, chLeft, chRight);
 
     supportingLine(hpLeft, leftSupEdge, hpRight, rightSupEdge);
 
     int leftFacet, leftInd, rightFacet, rightInd;
-    chLeft.locPoint(hpLeft[leftSupEdge], leftFacet, leftInd);
-    chRight.locPoint(hpRight[rightSupEdge], rightFacet, rightInd);
 
-    left.inside = &chLeft[leftFacet];
-    left.setIndex(leftInd);
-    right.inside = &chRight[rightFacet];
-    right.setIndex(rightInd);
+#pragma omp parallel num_threads(2)
+    {
+        int id = omp_get_thread_num();
+        bool enoughThreads = omp_get_num_threads() >= 2;
+        if (id == 0 || !enoughThreads) {
+            chLeft.locPoint(hpLeft[leftSupEdge], leftFacet, leftInd);
+            left.setInside(&chLeft[leftFacet]);
+            left.setIndex(leftInd);
+        }
+        if (id == 1 || !enoughThreads) {
+            chRight.locPoint(hpRight[rightSupEdge], rightFacet, rightInd);
+            right.setInside(&chRight[rightFacet]);
+            right.setIndex(rightInd);
+        }
+    }
+#pragma omp parallel num_threads(2)
+    {
+        int id = omp_get_thread_num();
+        bool enoughThreads = omp_get_num_threads() >= 2;
+        if (id == 0 || !enoughThreads) {
+            nextHorizon(left, right.a(), COUNTER);
+            leftInside = left.getInside();
+        }
+        if (id == 1 || !enoughThreads) {
+            nextHorizon(right, left.a(), CLOCKWISE);
+            rightInside = right.getOutside();
+        }
+    }
+}
 
-    nextHorizon(left, right.a(), COUNTER);
-    leftInside = left.inside;
-    nextHorizon(right, left.a(), CLOCKWISE);
-    rightInside = right.outside();
+/**
+ * builds the 2d projections of each of the convex hulls.
+ * @param hpLeft the left projection
+ * @param hpRight the right projection
+ */
+void GiftWrapping::buildHullProjections(HullProj2d& hpLeft, HullProj2d& hpRight,
+        ConvexHull& chLeft, ConvexHull& chRight) {
+    omp_set_num_threads(2);
+#pragma omp parallel
+    {
+        int id = omp_get_thread_num();
+        bool enoughThreads = omp_get_num_threads() >= 2;
+        if (id == 0 || !enoughThreads)hpLeft.build(chLeft);
+        if (id == 1 || !enoughThreads)hpRight.build(chRight);
+    }
 }
 
 /**
@@ -103,30 +156,32 @@ void GiftWrapping::buildBridge(ConvexHull& chLeft, ConvexHull& chRight) {
     SmartEdge leftEdge(-1, nullptr), rightEdge(-1, nullptr);
     initEdges(leftEdge, rightEdge, chLeft, chRight);
 
-    push_back(SmartFacet(leftEdge.a(), leftEdge.b(), rightEdge.a()));
-    self[0].setNeighbor(0, leftEdge.outside());
-    leftEdge.outside()->setNeighbor(leftEdge.outsideIndex(), &self[0]);
-
-    stl();
-
-    for (int i = 0; !endBridge(); i++) {
+    for (int i = !firstFacet(leftEdge, rightEdge); !endBridge(); i++) {
         if (i % 2 == 0) addFacet(rightEdge, CLOCKWISE, leftEdge);
         else addFacet(leftEdge, COUNTER, rightEdge);
     }
 
-    neighborLastToFirst();
-
 }
 
 /**
- * Sets the last bridge facet to be neighbors with the first bridge facet. 
- * @param clockwiseLast was the facet added in the clockwise or 
- * counter clockwise direction?
+ * adds the first facet
+ * @param leftEdge the left edge traversing the horizon
+ * @param rightEdge the right edge traversing the horizon
+ * @return true if the first facet is on the left side, false if it's on the 
+ * right.
  */
-void GiftWrapping::neighborLastToFirst() {
+bool GiftWrapping::firstFacet(SmartEdge& leftEdge, SmartEdge& rightEdge) {
+    push_back(SmartFacet(leftEdge.a(), leftEdge.b(), rightEdge.a()));
+    self[0].setNeighbor(0, leftEdge.getOutside());
 
-    self[0].setNeighbor(self[0].counterCl() ? 2 : 1, &self[size() - 1]);
-    self[size() - 1].setNeighbor(self[size() - 1].counterCl() ? 1 : 2, &self[0]);
+    if (self[0].faces(rightEdge.b()) || self[0].faces(rightEdge.a())) {
+        pop_back();
+        push_back(SmartFacet(rightEdge.b(), rightEdge.a(), leftEdge.a()));
+        self[0].setNeighbor(0, rightEdge.getInside());
+
+        return 0;
+    }
+    return 1;
 }
 
 /**
@@ -142,36 +197,27 @@ void GiftWrapping::neighborLastToFirst() {
  */
 void GiftWrapping::addFacet(SmartEdge& edge, bool counter, SmartEdge& farEdge) {
 
-    if (!nextHorizon(edge, farEdge.b(), counter)) {
-        farEdge.progress();
-        return;
-    }
+    SmartEdge checkA(edge);
+    nextHorizon(checkA, farEdge.a(), counter);
 
-    if (size() > 0 && self[size() - 1].faces(edge.b())) {
-        removeLast(farEdge);
+    if (!nextHorizon(edge, farEdge.b(), counter) || (size() > 0 &&
+            (self[size() - 1].faces(edge.b()) ||
+            self[size() - 1].faces(checkA.b())))) {
+        edge = checkA;
+        pop_back();
         farEdge.backUp();
+
     }
 
-    if (counter)push_back(SmartFacet(edge.a(), edge.b(), farEdge.b()));
-    else push_back(SmartFacet(edge.b(), edge.a(), farEdge.b()));
+    if (counter) {
+        push_back(SmartFacet(edge.a(), edge.b(), farEdge.b()));
+        self[size() - 1].setNeighbor(0, edge.getOutside());
+    } else {
+        push_back(SmartFacet(edge.b(), edge.a(), farEdge.b()));
+        self[size() - 1].setNeighbor(0, edge.getInside());
+    }
 
-    stl();
-    setNeighbors(edge);
     farEdge.progress();
-
-}
-
-/**
- * Remove bad neighboring created by  the last facet added to the wrong side.
- * @param edge the edge at the base of the facet removed.
- */
-void GiftWrapping::removeLast(SmartEdge& edge) {
-
-    SmartFacet* out = self[size() - 1].getNeighbor(0);
-    int outIndex = out->neighborIndex(&self[size() - 1]);
-    out->setNeighbor(outIndex, self[size() - 1].counterCl() ? edge.inside : edge.oldOutside);
-
-    pop_back();
 
 }
 
@@ -193,23 +239,20 @@ bool GiftWrapping::endBridge() {
  * @param edge the base of the facet
  * @param counterClock the direction the facet moves around the horizon.
  */
-void GiftWrapping::setNeighbors(SmartEdge& edge) {
+void GiftWrapping::setNeighbors() {
 
-    bool counterClock = (*this)[size() - 1].counterCl();
-
-    SmartFacet* night = counterClock ? edge.outside() : edge.inside;
-    int nightIndex = counterClock ? edge.outsideIndex() : edge.getIndex();
-    if (!counterClock) edge.oldOutside = edge.outside();
-
-    self[size() - 1].setNeighbor(0, night);
-    night->setNeighbor(nightIndex, &self[size() - 1]);
-
-    if (size() > 1) {
-        int leadingEdge = self[size() - 2].counterCl() ? 1 : 2;
-        int trailingEdge = self[size() - 1].counterCl() ? 2 : 1;
-        self[size() - 1].setNeighbor(trailingEdge, &self[size() - 2]);
-        self[size() - 2].setNeighbor(leadingEdge, &self[size() - 1]);
+    for (int i = 0; i < size(); i++) {
+        int neighborInd = self[i].getNeighbor(0)->pointIndex(self[i][1]);
+        self[i].getNeighbor(0)->setNeighbor(neighborInd, &self[i]);
+        if (self[i].counterCl()) {
+            self[i].setNeighbor(1, &self[(i + 1) % size()]);
+            self[i].setNeighbor(2, &self[i > 0 ? (i - 1) : size() - 1]);
+        } else {
+            self[i].setNeighbor(2, &self[(i + 1) % size()]);
+            self[i].setNeighbor(1, &self[i > 0 ? (i - 1) : size() - 1]);
+        }
     }
+    bondBaseNeighbors();
 }
 
 /**
@@ -220,14 +263,13 @@ void GiftWrapping::setNeighbors(SmartEdge& edge) {
  * @param clockwise the direction the horizon edge goes.
  * @return false if the horizon has returned to the beginning.
  */
-bool GiftWrapping::nextHorizon(SmartEdge& edge, Point star, bool counter) {
-    int i = 0;
-    while ((counter ? edge.outside() : edge.inside)->faces(star) || //day 
-            !(counter ? edge.inside : edge.outside())->faces(star)) { //night
-        assert(i++ < 50);
+bool GiftWrapping::nextHorizon(SmartEdge& edge, const Point& star, bool counter) const {
+    SmartEdge start(edge);
+    while ((counter ? edge.getOutside() : edge.getInside())->faces(star) || //day 
+            !(counter ? edge.getInside() : edge.getOutside())->faces(star)) { //night
         edge.flip();
         edge.progress();
-        if (edge.outside() == nullptr) return false;
+        if (start == edge) return false;
 
     }
     return true;
@@ -242,8 +284,8 @@ bool GiftWrapping::nextHorizon(SmartEdge& edge, Point star, bool counter) {
  * @param hpRight a 2d projection of the right hull.
  * @param rSupEdge Like the lSupEdge, but for the right 2d proj.
  */
-void GiftWrapping::supportingLine(HullProj2d& hpLeft, int& lSupEdge, 
-                                  HullProj2d& hpRight, int& rSupEdge) {
+void GiftWrapping::supportingLine(const HullProj2d& hpLeft, int& lSupEdge,
+        const HullProj2d& hpRight, int& rSupEdge) const {
 
     lSupEdge = hpLeft.maxX();
     rSupEdge = hpRight.minX();
@@ -253,8 +295,10 @@ void GiftWrapping::supportingLine(HullProj2d& hpLeft, int& lSupEdge,
 
         oldLeftInd = lSupEdge;
         oldRightInd = rSupEdge;
+
         while (hpLeft.edgeFaces(lSupEdge, hpRight[rSupEdge])) {
             lSupEdge = (lSupEdge + 1) % hpLeft.size();
+
         }
         while (hpRight.edgeFaces(rSupEdge - 1, hpLeft[oldLeftInd])) {
             rSupEdge--;
@@ -267,19 +311,58 @@ void GiftWrapping::supportingLine(HullProj2d& hpLeft, int& lSupEdge,
  * checks to see if two elements of the bridge should be neighbors at their 
  * bases (0 index).
  */
-void GiftWrapping::bondFlatNeighbors() {
-    vector<SmartFacet*> lefts, rights;
-    for (int i = 0; i < size() && (lefts.size() < 3 || rights.size() < 3); i++)
-        if (self[i].counterCl()) lefts.push_back(&self[i]);
-        else rights.push_back(&self[i]);
-    if (lefts.size() == 2) bondBasesForFlatNeigbors(*lefts[0], *lefts[1]);
-    if (rights.size() == 2) bondBasesForFlatNeigbors(*rights[0], *rights[1]);
+void GiftWrapping::bondBaseNeighbors() {
+
+    //  TODO:  This needs to be made to work.
+
+    struct hash {
+    public:
+        double operator()(const SmartEdge& edge) const {
+            Point a(edge.a());
+            Point b(edge.b());
+
+            uint32_t h1 = std::hash<double>()(a.x);
+            uint32_t h2 = std::hash<double>()(a.y);
+            size_t h3 = std::hash<double>()(a.z);
+
+            size_t h4 = std::hash<double>()(b.x);
+            size_t h5 = std::hash<double>()(b.y);
+            size_t h6 = std::hash<double>()(b.z);
+
+            size_t result1 = (h1 ^ (h2 << 1)) ^ h3;
+            size_t result2 = (h4 ^ (h5 << 6)) ^ h3;
+
+            return result1 + result2;
+        }
+    };
+
+    struct EdgeEqual {
+    public:
+
+        bool operator()(const SmartEdge& e1, const SmartEdge& e2) const {
+            return e1.a() == e2.b() && e1.b() == e2.a();
+        }
+    };
+
+    unordered_set<SmartEdge, hash, EdgeEqual> hashBase;
+    for (int i = 0; i < size(); i++) {
+        SmartEdge baseI(0, &self[i]);
+        if (!hashBase.insert(baseI).second) {
+            bondBasesForFlatNeighbors(&self[i], (*hashBase.find(baseI)).getOutside());
+        }
+    }
+    //
+    //    for (int i = 0; i < size(); i++)
+    //        for (int j = i + 1; j < size(); j++)
+    //            if (self[i][0] == self[j][1] && self[i][1] == self[j][0])
+    //                bondBasesForFlatNeighbors(self[i], self[j]);
+
 }
 
 /**
  * bonds the bases of these neighbors
  */
-void GiftWrapping::bondBasesForFlatNeigbors(SmartFacet& f1, SmartFacet& f2) {
-    f1.setNeighbor(0, &f2);
-    f2.setNeighbor(0, &f1);
+void GiftWrapping::bondBasesForFlatNeighbors(SmartFacet* f1, SmartFacet* f2) {
+    f1->setNeighbor(0, f2);
+    f2->setNeighbor(0, f1);
 }
