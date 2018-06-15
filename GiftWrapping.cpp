@@ -315,9 +315,9 @@ void GiftWrapping::bondBaseNeighbors() {
 
     //  TODO:  This needs to be made to work.
 
-    struct hash {
+    struct EdgeHasher{
     public:
-        double operator()(const SmartEdge& edge) const {
+        size_t operator()(const SmartEdge& edge) const {
             Point a(edge.a());
             Point b(edge.b());
 
@@ -336,22 +336,21 @@ void GiftWrapping::bondBaseNeighbors() {
         }
     };
 
-    struct EdgeEqual {
-    public:
+    struct EdgeComparator {
 
         bool operator()(const SmartEdge& e1, const SmartEdge& e2) const {
-            return e1.a() == e2.b() && e1.b() == e2.a();
+            return e1.a().distSquared(e2.b()) < 1e-5  && e1.b().distSquared(e2.a()) < 1e-5;
         }
     };
 
-    unordered_set<SmartEdge, hash, EdgeEqual> hashBase;
+    unordered_set<SmartEdge, EdgeHasher, EdgeComparator> edgeSet;
     for (int i = 0; i < size(); i++) {
         SmartEdge baseI(0, &self[i]);
-        if (!hashBase.insert(baseI).second) {
-            bondBasesForFlatNeighbors(&self[i], (*hashBase.find(baseI)).getOutside());
+        if (!(edgeSet.insert(baseI).second)) {
+            bondBasesForFlatNeighbors(&self[i], (*edgeSet.find(baseI)).getOutside());
         }
     }
-    //
+    //The code below, when in place of the code above, works.  It's just too slow.
     //    for (int i = 0; i < size(); i++)
     //        for (int j = i + 1; j < size(); j++)
     //            if (self[i][0] == self[j][1] && self[i][1] == self[j][0])
